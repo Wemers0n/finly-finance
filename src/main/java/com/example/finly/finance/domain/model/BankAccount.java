@@ -1,7 +1,7 @@
 package com.example.finly.finance.domain.model;
 
+import com.example.finly.finance.domain.model.enums.EAccountType;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,24 +29,24 @@ public class BankAccount {
     @Column(name = "account_name", nullable = false, length = 50)
     private String accountName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_type_id", nullable = false)
-    private AccountType accountTypeId;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_type", nullable = false, length = 30)
+    private EAccountType accountType;
 
     @Column(name = "current_balance", nullable = false)
     private BigDecimal currentBalance;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public BankAccount(User userId, String accountName, AccountType accountTypeId, BigDecimal initialBalance){
+    public BankAccount(User userId, String accountName, EAccountType accountType, BigDecimal initialBalance){
         this.id = UUID.randomUUID();
         this.userId = userId;
         this.accountName = Objects.requireNonNull(accountName);
-        this.accountTypeId = Objects.requireNonNull(accountTypeId);
+        this.accountType = Objects.requireNonNull(accountType);
         this.currentBalance = initialBalance != null ? initialBalance : BigDecimal.ZERO;
 
         this.createdAt = LocalDateTime.now();
@@ -64,6 +64,7 @@ public class BankAccount {
     @PrePersist
     private void onCreate() {
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate

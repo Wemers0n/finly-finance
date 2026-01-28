@@ -1,5 +1,6 @@
 package com.example.finly.finance.domain.model;
 
+import com.example.finly.finance.domain.model.enums.EAccountType;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -62,9 +63,8 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public BankAccount addBankAccount(String accountName, AccountType accountType, BigDecimal initialBalance){
+    public BankAccount addBankAccount(String accountName, EAccountType accountType, BigDecimal initialBalance){
         validateAccountName(accountName);
-        validateAccountType(accountType);
         validateInitialBalance(accountType, initialBalance);
 
         BankAccount account = new BankAccount(this, accountName, accountType, normalizeBalance(initialBalance));
@@ -122,13 +122,7 @@ public class User {
         }
     }
 
-    private void validateAccountType(AccountType accountType){
-        if (accountType == null){
-            throw new RuntimeException("Tipo de conta inválido");
-        }
-    }
-
-    private void validateInitialBalance(AccountType accountType, BigDecimal initialBalance){
+    private void validateInitialBalance(EAccountType accountType, BigDecimal initialBalance){
         if (initialBalance == null) return;
 
         if (!accountType.allowsNegativeBalance() && initialBalance.compareTo(BigDecimal.ZERO) < 0){

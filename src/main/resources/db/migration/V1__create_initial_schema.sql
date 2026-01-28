@@ -8,26 +8,17 @@ CREATE TABLE tb_users(
     updated_at TIMESTAMP    NOT NULL
 );
 
-CREATE TABLE tb_account_types(
-    id                      INTEGER PRIMARY KEY,
-    account_type            VARCHAR(50) NOT NULL UNIQUE,
-    allows_negative_balance BOOLEAN     NOT NULL DEFAULT FALSE
-);
-
 CREATE TABLE tb_bank_accounts(
     id              UUID PRIMARY KEY,
     user_id         UUID           NOT NULL,
     account_name    VARCHAR(50)    NOT NULL,
-    account_type_id INTEGER        NOT NULL,
+    account_type    VARCHAR(30)    NOT NULL,
     current_balance DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     created_at      TIMESTAMP      NOT NULL,
     updated_at      TIMESTAMP      NOT NULL,
 
     CONSTRAINT fk_bank_account_user
         FOREIGN KEY (user_id) REFERENCES tb_users (id) ON DELETE CASCADE,
-
-    CONSTRAINT fk_bank_account_type
-        FOREIGN KEY (account_type_id) REFERENCES tb_account_types (id)
 );
 
 CREATE TABLE tb_credit_cards(
