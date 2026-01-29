@@ -6,10 +6,7 @@ import com.example.finly.finance.domain.services.CreateBankTransactionService;
 import com.example.finly.finance.domain.services.CreateCardTransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -27,9 +24,9 @@ public class TransactionController {
         return ResponseEntity.ok(transactionBankId);
     }
 
-    @PostMapping("/card")
-    public ResponseEntity<UUID> createCardTransaction(@RequestBody CardTransactionInput input) {
-        UUID transactionCardId = cardTransactionService.cardTransaction(input);
+    @PostMapping("/card/{userId}")
+    public ResponseEntity<UUID> createCardTransaction(@PathVariable UUID userId, @RequestBody CardTransactionInput input) {
+        UUID transactionCardId = cardTransactionService.cardTransaction(userId, input);
         return ResponseEntity.ok(transactionCardId);
     }
 }

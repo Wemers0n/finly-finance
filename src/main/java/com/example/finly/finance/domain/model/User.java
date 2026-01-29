@@ -58,9 +58,6 @@ public class User {
         this.lastname = Objects.requireNonNull(lastname);
         this.email = Objects.requireNonNull(email);
         this.password = Objects.requireNonNull(password);
-
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
     }
 
     public BankAccount addBankAccount(String accountName, EAccountType accountType, BigDecimal initialBalance){
@@ -106,9 +103,19 @@ public class User {
         }
     }
 
+    public Optional<CreditCard> findCardById(UUID id){
+        if (!(id == null || id.toString().isBlank())){
+            return creditCards.stream()
+                    .filter(card -> card.getId().equals(id))
+                    .findFirst();
+        }
+        return Optional.empty();
+    }
+
     @PrePersist
     private void onCreate() {
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate

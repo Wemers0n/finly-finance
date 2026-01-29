@@ -47,18 +47,27 @@ public class BankAccount {
         this.userId = userId;
         this.accountName = Objects.requireNonNull(accountName);
         this.accountType = Objects.requireNonNull(accountType);
-        this.currentBalance = initialBalance != null ? initialBalance : BigDecimal.ZERO;
-
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.currentBalance = Objects.requireNonNullElse(initialBalance, BigDecimal.ZERO); // initialBalance != null ? initialBalance : BigDecimal.ZERO;
     }
 
     public void debit(BigDecimal value){
+        validateValue(value);
+
+        if (!accountType.allowsNegativeBalance() && currentBalance.subtract(value).compareTo(BigDecimal.ZERO) < 0){
+            throw new RuntimeException("Saldo insufuciente");
+        }
         this.currentBalance = this.currentBalance.subtract(value);
     }
 
     public void credit(BigDecimal value){
+        validateValue(value);
         this.currentBalance = this.currentBalance.add(value);
+    }
+
+    private void validateValue(BigDecimal value){
+        if (value == null || value.compareTo(BigDecimal.ZERO) <= 0){
+            throw new RuntimeException("Valor da transação deve ser maior que zero");
+        }
     }
 
     @PrePersist

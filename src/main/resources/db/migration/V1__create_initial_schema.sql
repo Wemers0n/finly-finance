@@ -28,9 +28,10 @@ CREATE TABLE tb_credit_cards(
     card_name   VARCHAR(50)    NOT NULL,
     brand       VARCHAR(30)    NOT NULL,
     card_limit  DECIMAL(10, 2) NOT NULL,
+    used_limit  DECIMAL(10,2)  NOT NULL,
     closing_day INTEGER        NOT NULL,
     due_day     INTEGER        NOT NULL,
-    created_at  TIMESTAMP     NOT NULL,
+    created_at  TIMESTAMP      NOT NULL,
     updated_at  TIMESTAMP,
 
     CONSTRAINT fk_credit_card_user

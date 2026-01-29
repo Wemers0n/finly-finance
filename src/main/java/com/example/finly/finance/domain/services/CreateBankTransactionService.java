@@ -38,11 +38,10 @@ public class CreateBankTransactionService {
     }
 
     private void applyTransaction(BankAccount account, BankTransaction transaction){
-        if (transaction.getOperation() == EBalanceOperation.DEBIT){
-            account.debit(transaction.getValue());
-        } else {
-            account.credit(transaction.getValue());
+        if (!(transaction.getOperation() == EBalanceOperation.DEBIT)){
+            throw new RuntimeException("Operação negada!");
         }
+        account.debit(transaction.getValue());
     }
 
 }
