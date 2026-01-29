@@ -18,7 +18,7 @@ CREATE TABLE tb_bank_accounts(
     updated_at      TIMESTAMP      NOT NULL,
 
     CONSTRAINT fk_bank_account_user
-        FOREIGN KEY (user_id) REFERENCES tb_users (id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES tb_users (id) ON DELETE CASCADE
 );
 
 CREATE TABLE tb_credit_cards(
