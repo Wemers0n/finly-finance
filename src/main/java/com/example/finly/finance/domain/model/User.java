@@ -18,6 +18,7 @@ import java.util.*;
 public class User {
 
     @Id
+    @GeneratedValue
     @EqualsAndHashCode.Include
     private UUID id;
 
@@ -53,7 +54,6 @@ public class User {
 
 
     public User(String firstname, String lastname, String email, String password){
-        this.id = UUID.randomUUID();
         this.firstname = Objects.requireNonNull(firstname);
         this.lastname = Objects.requireNonNull(lastname);
         this.email = Objects.requireNonNull(email);

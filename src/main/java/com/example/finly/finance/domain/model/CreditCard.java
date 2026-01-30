@@ -1,15 +1,17 @@
 package com.example.finly.finance.domain.model;
 
 import com.example.finly.finance.domain.model.enums.EBrandCard;
+import com.example.finly.finance.domain.model.enums.EInvoiceStatus;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.UUID;
+import java.time.YearMonth;
+import java.util.*;
 
 @Entity
 @Table(name = "tb_credit_cards")
@@ -19,6 +21,7 @@ import java.util.UUID;
 public class CreditCard {
 
     @Id
+    @GeneratedValue
     @EqualsAndHashCode.Include
     private UUID id;
 
@@ -49,6 +52,9 @@ public class CreditCard {
     @Column(nullable = false)
     private Integer dueDay;
 
+    @OneToMany(mappedBy = "creditCardId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Invoice> invoices = new ArrayList<>();
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -56,7 +62,6 @@ public class CreditCard {
     private LocalDateTime updatedAt;
 
     public CreditCard(User userId, BankAccount bankAccountId, String cardName, EBrandCard brand, BigDecimal cardLimit, Integer closingDay, Integer dueDay){
-        this.id = UUID.randomUUID();
         this.userId = Objects.requireNonNull(userId);
         this.bankAccountId = Objects.requireNonNull(bankAccountId);
         this.cardName = Objects.requireNonNull(cardName);
@@ -77,6 +82,33 @@ public class CreditCard {
         }
 
         this.usedLimit = this.usedLimit.add(value);
+    }
+
+    public Optional<Invoice> findOpenInvoice(YearMonth referenceMonth) {
+        return invoices.stream()
+                .filter(i -> i.getReferenceMonth().equals(referenceMonth))
+                .filter(i -> i.getStatus() == EInvoiceStatus.OPEN)
+                .findFirst();
+    }
+
+    public Invoice createInvoice(YearMonth referenceMonth) {
+        Invoice invoice = new Invoice(
+                this,
+                calculateClosingDate(referenceMonth),
+                calculateDueDate(referenceMonth),
+                referenceMonth
+        );
+
+        this.invoices.add(invoice);
+        return invoice;
+    }
+
+    private LocalDate calculateClosingDate(YearMonth referenceMonth) {
+        return referenceMonth.atDay(closingDay);
+    }
+
+    private LocalDate calculateDueDate(YearMonth referenceMonth) {
+        return referenceMonth.plusMonths(1).atDay(dueDay);
     }
 
     @PrePersist
