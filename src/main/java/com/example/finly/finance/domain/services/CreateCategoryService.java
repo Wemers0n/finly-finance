@@ -1,6 +1,6 @@
 package com.example.finly.finance.domain.services;
 
-import com.example.finly.finance.application.dtos.CategoryInput;
+import com.example.finly.finance.application.dtos.in.CategoryInput;
 import com.example.finly.finance.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
