@@ -1,7 +1,7 @@
 package com.example.finly.finance.application.controller;
 
-import com.example.finly.finance.application.dtos.BankTransactionInput;
-import com.example.finly.finance.application.dtos.CardTransactionInput;
+import com.example.finly.finance.application.dtos.in.BankTransactionInput;
+import com.example.finly.finance.application.dtos.in.CardTransactionInput;
 import com.example.finly.finance.domain.services.CreateBankTransactionService;
 import com.example.finly.finance.domain.services.CreateCardTransactionService;
 import lombok.RequiredArgsConstructor;

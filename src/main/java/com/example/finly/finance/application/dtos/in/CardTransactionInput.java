@@ -1,4 +1,4 @@
-package com.example.finly.finance.application.dtos;
+package com.example.finly.finance.application.dtos.in;
 
 import java.math.BigDecimal;
 import java.util.UUID;

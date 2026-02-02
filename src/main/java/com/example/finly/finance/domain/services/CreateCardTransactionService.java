@@ -1,6 +1,6 @@
 package com.example.finly.finance.domain.services;
 
-import com.example.finly.finance.application.dtos.CardTransactionInput;
+import com.example.finly.finance.application.dtos.in.CardTransactionInput;
 import com.example.finly.finance.domain.model.*;
 import com.example.finly.finance.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.example.finly.finance.application.dtos;
+package com.example.finly.finance.application.dtos.in;
 
 import com.example.finly.finance.domain.model.enums.EBalanceOperation;
 import com.example.finly.finance.domain.model.enums.EBankTransactionType;

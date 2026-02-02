@@ -1,6 +1,7 @@
 package com.example.finly.finance.domain.model;
 
 import com.example.finly.finance.domain.model.enums.EAccountType;
+import com.example.finly.finance.domain.model.enums.EBrandCard;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -60,13 +61,20 @@ public class User {
         this.password = Objects.requireNonNull(password);
     }
 
-    public BankAccount addBankAccount(String accountName, EAccountType accountType, BigDecimal initialBalance){
+    public UUID addBankAccount(String accountName, EAccountType accountType, BigDecimal initialBalance){
         validateAccountName(accountName);
         validateInitialBalance(accountType, initialBalance);
 
         BankAccount account = new BankAccount(this, accountName, accountType, normalizeBalance(initialBalance));
         bankAccounts.add(account);
-        return account;
+        return account.getId();
+    }
+
+    public Optional<BankAccount> findBankAccountById(UUID accountId){
+        return Optional.ofNullable(accountId)
+                .flatMap(id -> bankAccounts.stream()
+                        .filter(account -> account.getId().equals(id))
+                        .findFirst());
     }
 
     public Category addCategory(String name) {
@@ -79,13 +87,11 @@ public class User {
     }
 
     public Optional<Category> findCategoryByName(String categoryName) {
-        if (!(categoryName == null || categoryName.isBlank())) {
-            return categories.stream()
-                    .filter(category -> category.getName().equalsIgnoreCase(categoryName))
-                    .findFirst();
-        }
-
-        return Optional.empty();
+        return Optional.ofNullable(categoryName)
+                .filter(name -> !name.isBlank()) // prossegue apenas se não estiver vazia
+                .flatMap(name -> categories.stream()
+                        .filter(category -> category.getName().equalsIgnoreCase(name))
+                        .findFirst());
     }
 
     private void validateCategoryName(String name) {
@@ -103,13 +109,17 @@ public class User {
         }
     }
 
+    public UUID addCreditCard(BankAccount accountId, String cardName, EBrandCard brand, BigDecimal cardLimit, Integer closingDay, Integer dueDay){
+        CreditCard card = new CreditCard(this, accountId, cardName, brand, cardLimit, closingDay, dueDay);
+        creditCards.add(card);
+        return card.getId();
+    }
+
     public Optional<CreditCard> findCardById(UUID id){
-        if (!(id == null || id.toString().isBlank())){
-            return creditCards.stream()
-                    .filter(card -> card.getId().equals(id))
-                    .findFirst();
-        }
-        return Optional.empty();
+        return Optional.ofNullable(id)
+                .flatMap(cardId -> creditCards.stream()
+                        .filter(card -> card.getId().equals(cardId))
+                        .findFirst());
     }
 
     @PrePersist

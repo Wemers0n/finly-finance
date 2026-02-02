@@ -1,6 +1,6 @@
 package com.example.finly.finance.application.controller;
 
-import com.example.finly.finance.application.dtos.BankAccountInput;
+import com.example.finly.finance.application.dtos.in.BankAccountInput;
 import com.example.finly.finance.domain.services.CreateBankAccountService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -20,11 +20,11 @@ public class BankAccountController {
     }
 
     @PostMapping("/{userId}")
-    public ResponseEntity<Void> createAccount(@PathVariable UUID userId, @RequestBody @Valid BankAccountInput input){
+    public ResponseEntity<UUID> createAccount(@PathVariable UUID userId, @RequestBody @Valid BankAccountInput input){
 
-        this.accountService.create(userId, input);
+       var bankId = this.accountService.create(userId, input);
 
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(bankId);
     }
 }

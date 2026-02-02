@@ -1,4 +1,4 @@
-package com.example.finly.finance.application.dtos;
+package com.example.finly.finance.application.dtos.in;
 
 public record UserInput(
         String firstname,

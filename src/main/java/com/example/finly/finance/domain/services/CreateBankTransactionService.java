@@ -1,6 +1,6 @@
 package com.example.finly.finance.domain.services;
 
-import com.example.finly.finance.application.dtos.BankTransactionInput;
+import com.example.finly.finance.application.dtos.in.BankTransactionInput;
 import com.example.finly.finance.domain.model.BankTransaction;
 import com.example.finly.finance.domain.model.enums.EBalanceOperation;
 import com.example.finly.finance.domain.model.BankAccount;

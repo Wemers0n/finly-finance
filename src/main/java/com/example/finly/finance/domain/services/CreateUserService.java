@@ -1,6 +1,6 @@
 package com.example.finly.finance.domain.services;
 
-import com.example.finly.finance.application.dtos.UserInput;
+import com.example.finly.finance.application.dtos.in.UserInput;
 import com.example.finly.finance.domain.model.User;
 import com.example.finly.finance.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
