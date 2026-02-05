@@ -1,5 +1,6 @@
 package com.example.finly.finance.domain.model;
 
+import com.example.finly.finance.domain.model.enums.ETransactionOriginType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,7 +40,7 @@ public class CardTransaction extends Transaction{
     private Integer totalInstallments = 1;
 
     public CardTransaction(CreditCard cardId, Category categoryId, Invoice invoiceId, BigDecimal value, Integer installNumber, Integer totalInstallments, String description){
-        super(categoryId, value, description);
+        super(categoryId, ETransactionOriginType.CARD, value, description);
         this.cardId = Objects.requireNonNull(cardId);
         this.invoiceId = Objects.requireNonNull(invoiceId);
         this.installNumber = Objects.requireNonNull(installNumber);

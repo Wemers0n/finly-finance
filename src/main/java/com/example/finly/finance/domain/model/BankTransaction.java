@@ -2,6 +2,7 @@ package com.example.finly.finance.domain.model;
 
 import com.example.finly.finance.domain.model.enums.EBalanceOperation;
 import com.example.finly.finance.domain.model.enums.EBankTransactionType;
+import com.example.finly.finance.domain.model.enums.ETransactionOriginType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,7 +30,7 @@ public class BankTransaction extends Transaction{
     private EBankTransactionType transactionType;
 
     public BankTransaction(BankAccount accountId, Category categoryId, BigDecimal value, String description, EBalanceOperation operation, EBankTransactionType transactionType){
-        super(categoryId, value, description);
+        super(categoryId, ETransactionOriginType.BANK, value, description);
         this.accountId = Objects.requireNonNull(accountId);
         this.operation = Objects.requireNonNull(operation);
         this.transactionType = Objects.requireNonNull(transactionType);

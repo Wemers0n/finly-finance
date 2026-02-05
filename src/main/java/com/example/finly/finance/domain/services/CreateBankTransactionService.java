@@ -30,6 +30,7 @@ public class CreateBankTransactionService {
                 .orElseThrow(() -> new RuntimeException("Error: category does not exist"));
 
         BankTransaction transaction = new BankTransaction(account, category, input.value(), input.description(), input.operation(), input.transactionType());
+        transaction.markAsCompleted();
         category.addTransaction(transaction);
 
         applyTransaction(account, transaction);

@@ -1,5 +1,6 @@
 package com.example.finly.finance.domain.model;
 
+import com.example.finly.finance.domain.model.enums.ETransactionOriginType;
 import com.example.finly.finance.domain.model.enums.ETransactionStatus;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
@@ -32,6 +33,10 @@ public abstract class Transaction {
     private BigDecimal value;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "transaction_origin_type", nullable = false)
+    private ETransactionOriginType originType;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "transaction_status")
     private ETransactionStatus transactionStatus = ETransactionStatus.PENDING;
 
@@ -42,11 +47,21 @@ public abstract class Transaction {
     private LocalDateTime transactionDate;
 
     public Transaction(Category categoryId,
+                       ETransactionOriginType originType,
                        BigDecimal value,
                        String description) {
         this.categoryId = Objects.requireNonNull(categoryId);
+        this.originType = Objects.requireNonNull(originType);
         this.value = Objects.requireNonNull(value);
         this.description = description;
         this.transactionDate = LocalDateTime.now();
+    }
+
+    public void markAsCompleted(){
+        this.transactionStatus = ETransactionStatus.COMPLETED;
+    }
+
+    public void markAsExpired(){
+        this.transactionStatus = ETransactionStatus.EXPIRED;
     }
 }
