@@ -76,6 +76,7 @@ public class CreateCardTransactionService {
                     .orElseGet(() -> creditCard.createInvoice(referenceMonth));
 
             CardTransaction installmentTransaction = new CardTransaction(
+                    creditCard.getBankAccountId(),
                     creditCard,
                     category,
                     invoice,

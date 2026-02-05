@@ -17,10 +17,6 @@ import java.util.Objects;
 @NoArgsConstructor
 public class BankTransaction extends Transaction{
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id", nullable = false)
-    private BankAccount accountId;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "operation", nullable = false)
     private EBalanceOperation operation;
@@ -30,8 +26,7 @@ public class BankTransaction extends Transaction{
     private EBankTransactionType transactionType;
 
     public BankTransaction(BankAccount accountId, Category categoryId, BigDecimal value, String description, EBalanceOperation operation, EBankTransactionType transactionType){
-        super(categoryId, ETransactionOriginType.BANK, value, description);
-        this.accountId = Objects.requireNonNull(accountId);
+        super(accountId, categoryId, ETransactionOriginType.BANK, value, description);
         this.operation = Objects.requireNonNull(operation);
         this.transactionType = Objects.requireNonNull(transactionType);
     }

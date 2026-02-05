@@ -26,6 +26,10 @@ public abstract class Transaction {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", nullable = false)
+    private BankAccount accountId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category categoryId;
 
@@ -46,10 +50,11 @@ public abstract class Transaction {
     @Column(name = "transaction_date", nullable = false)
     private LocalDateTime transactionDate;
 
-    public Transaction(Category categoryId,
+    public Transaction(BankAccount accountId, Category categoryId,
                        ETransactionOriginType originType,
                        BigDecimal value,
                        String description) {
+        this.accountId = Objects.requireNonNull(accountId);
         this.categoryId = Objects.requireNonNull(categoryId);
         this.originType = Objects.requireNonNull(originType);
         this.value = Objects.requireNonNull(value);

@@ -39,8 +39,8 @@ public class CardTransaction extends Transaction{
     @Column(name = "total_installments")
     private Integer totalInstallments = 1;
 
-    public CardTransaction(CreditCard cardId, Category categoryId, Invoice invoiceId, BigDecimal value, Integer installNumber, Integer totalInstallments, String description){
-        super(categoryId, ETransactionOriginType.CARD, value, description);
+    public CardTransaction(BankAccount accountId, CreditCard cardId, Category categoryId, Invoice invoiceId, BigDecimal value, Integer installNumber, Integer totalInstallments, String description){
+        super(accountId, categoryId, ETransactionOriginType.CARD, value, description);
         this.cardId = Objects.requireNonNull(cardId);
         this.invoiceId = Objects.requireNonNull(invoiceId);
         this.installNumber = Objects.requireNonNull(installNumber);
