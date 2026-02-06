@@ -3,6 +3,9 @@ package com.example.finly.finance.domain.services;
 import com.example.finly.finance.application.dtos.in.CardTransactionInput;
 import com.example.finly.finance.domain.model.*;
 import com.example.finly.finance.domain.repository.UserRepository;
+import com.example.finly.finance.infraestructure.handler.exception.CategoryNotFoundException;
+import com.example.finly.finance.infraestructure.handler.exception.CreditCardNotFoundException;
+import com.example.finly.finance.infraestructure.handler.exception.UserNotExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,17 +42,17 @@ public class CreateCardTransactionService {
 
     private User findUser(UUID userId){
         return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuario não encontrado"));
+                .orElseThrow(UserNotExistsException::new);
     }
 
     private CreditCard findCreditCard(User user, UUID cardId){
         return user.findCardById(cardId)
-                .orElseThrow(() -> new RuntimeException("Error: card does not exist"));
+                .orElseThrow(CreditCardNotFoundException::new);
     }
 
     private Category findCategory(User user, String categoryName){
         return user.findCategoryByName(categoryName)
-                .orElseThrow(() -> new RuntimeException("Error: category does not exist"));
+                .orElseThrow(CategoryNotFoundException::new);
     }
 
     private void createInstallments(CreditCard creditCard, Category category, CardTransactionInput input){

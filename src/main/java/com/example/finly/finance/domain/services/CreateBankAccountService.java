@@ -1,6 +1,7 @@
 package com.example.finly.finance.domain.services;
 
 import com.example.finly.finance.application.dtos.in.BankAccountInput;
+import com.example.finly.finance.infraestructure.handler.exception.UserNotExistsException;
 import com.example.finly.finance.domain.model.User;
 import com.example.finly.finance.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class CreateBankAccountService {
 
     public UUID create(UUID userId, BankAccountInput input){
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotExistsException(userId.toString()));
 
         UUID bankId = user.addBankAccount(
                 input.accountName(),

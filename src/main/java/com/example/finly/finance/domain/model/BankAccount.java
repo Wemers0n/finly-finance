@@ -1,6 +1,7 @@
 package com.example.finly.finance.domain.model;
 
 import com.example.finly.finance.domain.model.enums.EAccountType;
+import com.example.finly.finance.infraestructure.handler.exception.TransactionDeniedException;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -54,7 +55,7 @@ public class BankAccount {
         validateValue(value);
 
         if (!accountType.allowsNegativeBalance() && currentBalance.subtract(value).compareTo(BigDecimal.ZERO) < 0){
-            throw new RuntimeException("Saldo insufuciente");
+            throw new TransactionDeniedException("Insufficient funds.");
         }
         this.currentBalance = this.currentBalance.subtract(value);
     }
@@ -66,7 +67,7 @@ public class BankAccount {
 
     private void validateValue(BigDecimal value){
         if (value == null || value.compareTo(BigDecimal.ZERO) <= 0){
-            throw new RuntimeException("Valor da transação deve ser maior que zero");
+            throw new TransactionDeniedException("The transaction value must be greater than zero.");
         }
     }
 

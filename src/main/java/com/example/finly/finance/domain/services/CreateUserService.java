@@ -3,6 +3,7 @@ package com.example.finly.finance.domain.services;
 import com.example.finly.finance.application.dtos.in.UserInput;
 import com.example.finly.finance.domain.model.User;
 import com.example.finly.finance.domain.repository.UserRepository;
+import com.example.finly.finance.infraestructure.handler.exception.EmailAlreadyRegisteredException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,7 @@ public class CreateUserService {
     public UUID create(UserInput input){
 
         if (userRepository.existsByEmail(input.email())) {
-            throw new RuntimeException("Email já cadastrado");
+            throw new EmailAlreadyRegisteredException(input.email());
         }
 
         User user = new User(
