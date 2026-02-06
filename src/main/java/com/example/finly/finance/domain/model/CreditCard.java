@@ -84,11 +84,12 @@ public class CreditCard {
         this.usedLimit = this.usedLimit.add(value);
     }
 
-    public Optional<Invoice> findOpenInvoice(YearMonth referenceMonth) {
+    public Invoice findOpenInvoice(YearMonth referenceMonth) {
         return invoices.stream()
                 .filter(i -> i.getReferenceMonth().equals(referenceMonth))
                 .filter(i -> i.getStatus() == EInvoiceStatus.OPEN)
-                .findFirst();
+                .findFirst()
+                .orElseGet(() -> createInvoice(referenceMonth));  // Retorna a existente ou cria uma nova
     }
 
     public Invoice createInvoice(YearMonth referenceMonth) {
@@ -101,6 +102,17 @@ public class CreditCard {
 
         this.invoices.add(invoice);
         return invoice;
+    }
+
+    public YearMonth invoiceMonth(LocalDate purchaseDate){
+        YearMonth month = YearMonth.from(purchaseDate);
+        LocalDate closingDate = month.atDay(closingDay);
+
+        // Se a compra ocorreu após o fechamento, ela pertence à fatura do mês seguinte
+        if (purchaseDate.isAfter(closingDate)){
+            return month.plusMonths(1);
+        }
+        return month;
     }
 
     private LocalDate calculateClosingDate(YearMonth referenceMonth) {

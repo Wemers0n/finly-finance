@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.UUID;
 
@@ -56,27 +57,36 @@ public class CreateCardTransactionService {
     }
 
     private void createInstallments(CreditCard creditCard, Category category, CardTransactionInput input){
+
+        // Resolve o mês da fatura base considerando o dia de fechamento do cartão.
+        // Ex:
+        // - compra antes do fechamento → fatura do mês atual
+        // - compra após o fechamento → próxima fatura
+        LocalDate purchaseDate = LocalDate.now();
+        YearMonth baseInvoiceMonth = creditCard.invoiceMonth(purchaseDate);
+
         BigDecimal totalValue = input.value();
         Integer totalInstallments = input.totalInstallments();
 
-        // Divide o valor total em parcelas iguais,
-        // aplicando o resto da divisão apenas na primeira parcela
-        // para evitar perda de centavos
+        // Divide o valor total em parcelas iguais.
+        // Usa escala 2 e HALF_EVEN para evitar distorções financeiras
         BigDecimal installmentValue = totalValue.divide(BigDecimal.valueOf(totalInstallments), 2, RoundingMode.HALF_EVEN);
         BigDecimal remainder = totalValue.subtract(installmentValue.multiply(BigDecimal.valueOf(totalInstallments)));
 
-        var currentMonth = YearMonth.now();
 
         // Cria e salva as parcelas
         for (int i = 1; i <= totalInstallments; i++){
             var currentInstallmentsValue = (i ==1) ? installmentValue.add(remainder) : installmentValue;
 
-            // Cada parcela pertence à fatura do mês correspondente
-            var referenceMonth = currentMonth.plusMonths(i - 1);
+            // Cada parcela pertence a uma fatura diferente:
+            // - parcela 1 → fatura base
+            // - parcela 2 → mês seguinte
+            // - parcela N → base + (N - 1)
+            YearMonth invoiceMonth = baseInvoiceMonth.plusMonths(i - 1);
 
-            // Reutilizar a fatura aberta do mês ou cria uma nova se não existir
-            Invoice invoice = creditCard.findOpenInvoice(referenceMonth)
-                    .orElseGet(() -> creditCard.createInvoice(referenceMonth));
+            // Reutiliza a fatura aberta do mês ou cria uma nova se não existir.
+            // Garante que exista no máximo uma fatura aberta por mêsr
+            Invoice invoice = creditCard.findOpenInvoice(invoiceMonth);
 
             CardTransaction installmentTransaction = new CardTransaction(
                     creditCard.getBankAccountId(),
@@ -84,7 +94,7 @@ public class CreateCardTransactionService {
                     category,
                     invoice,
                     currentInstallmentsValue,
-                    i,
+                    i, // numero da parcela
                     totalInstallments,
                     input.description()
             );
