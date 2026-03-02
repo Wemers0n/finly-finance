@@ -22,7 +22,6 @@ import java.util.*;
 public class CreditCard {
 
     @Id
-    @GeneratedValue
     @EqualsAndHashCode.Include
     private UUID id;
 
@@ -63,6 +62,7 @@ public class CreditCard {
     private LocalDateTime updatedAt;
 
     public CreditCard(User userId, BankAccount bankAccountId, String cardName, EBrandCard brand, BigDecimal cardLimit, Integer closingDay, Integer dueDay){
+        this.id = UUID.randomUUID();
         this.userId = Objects.requireNonNull(userId);
         this.bankAccountId = Objects.requireNonNull(bankAccountId);
         this.cardName = Objects.requireNonNull(cardName);

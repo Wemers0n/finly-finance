@@ -13,7 +13,7 @@ public interface CreditCardRepository extends JpaRepository<CreditCard, UUID> {
     @Query("""
         select c
         from CreditCard c
-        where c.invoiceClosingDay = :day
+        where c.closingDay = :day
     """)
     List<CreditCard> findCardsToCloseInvoice(@Param("day") int day);
 }
