@@ -4,10 +4,13 @@ import com.example.finly.finance.application.dtos.in.BankTransactionInput;
 import com.example.finly.finance.application.dtos.in.CardTransactionInput;
 import com.example.finly.finance.domain.services.account.CreateBankTransactionService;
 import com.example.finly.finance.domain.services.card.CreateCardTransactionService;
+import com.example.finly.finance.infraestructure.utils.UriUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.UUID;
 
 @RestController
@@ -19,14 +22,18 @@ public class TransactionController {
     private final CreateCardTransactionService cardTransactionService;
 
     @PostMapping("/bank")
-    public ResponseEntity<UUID> createBankTransaction(@RequestBody BankTransactionInput input){
+    public ResponseEntity<Void> createBankTransaction(@RequestBody BankTransactionInput input){
         UUID transactionBankId = bankTransactionService.bankTransaction(input);
-        return ResponseEntity.ok(transactionBankId);
+        URI locationTransactionBankUri = UriUtils.buildLocationUri(transactionBankId);
+
+        return ResponseEntity.created(locationTransactionBankUri).build();
     }
 
     @PostMapping("/card/{userId}")
-    public ResponseEntity<UUID> createCardTransaction(@PathVariable UUID userId, @RequestBody CardTransactionInput input) {
+    public ResponseEntity<Void> createCardTransaction(@PathVariable UUID userId, @RequestBody CardTransactionInput input) {
         UUID transactionCardId = cardTransactionService.cardTransaction(userId, input);
-        return ResponseEntity.ok(transactionCardId);
+        URI locationTransactionCardUri = UriUtils.buildLocationUri(transactionCardId);
+
+        return ResponseEntity.created(locationTransactionCardUri).build();
     }
 }
