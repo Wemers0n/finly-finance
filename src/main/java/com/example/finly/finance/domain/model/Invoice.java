@@ -24,6 +24,7 @@ import java.util.UUID;
 public class Invoice {
 
     @Id
+    @GeneratedValue
     @EqualsAndHashCode.Include
     private UUID id;
 
@@ -60,26 +61,33 @@ public class Invoice {
     private LocalDateTime updatedAt;
 
     public Invoice(CreditCard creditCardId, LocalDate closingDate, LocalDate dueDate, YearMonth referenceMonth){
-        this.id = UUID.randomUUID();
         this.creditCardId = Objects.requireNonNull(creditCardId);
         this.closingDate = Objects.requireNonNull(closingDate);
         this.dueDate = Objects.requireNonNull(dueDate);
         this.referenceMonth = Objects.requireNonNull(referenceMonth);
     }
 
-    public void addChanges(BigDecimal value){
-        validateValue(value);
-        this.totalAmount = this.totalAmount.add(value);
+    public void addTransaction(CardTransaction transaction) {
+        this.transactions.add(transaction);
+        this.totalAmount = this.totalAmount.add(transaction.getValue());
     }
 
-    public void payInvoice(BigDecimal value){
-        validateValue(value);
+    public boolean shouldClose(LocalDate today){
+        return status == EInvoiceStatus.OPEN && !today.isBefore(closingDate);
+    }
 
-        this.amountPaid = this.amountPaid.add(value);
+    public boolean isPayable(){
+        return status == EInvoiceStatus.CLOSED;
+    }
 
-        if (this.amountPaid.compareTo(this.totalAmount) >= 0) {
-            this.status = EInvoiceStatus.PAID;
+    public BigDecimal remainingAmount(){
+        return totalAmount.subtract(amountPaid);
+    }
+    public void markAsPaid(){
+        if (!isPayable()){
+            throw new IllegalStateException("A Fatura nao esta fechada para pagamento");
         }
+        this.status = EInvoiceStatus.PAID;
     }
 
     public void closeInvoice(){
@@ -88,11 +96,6 @@ public class Invoice {
         }
 
         this.status = EInvoiceStatus.CLOSED;
-    }
-
-    public void addTransaction(CardTransaction transaction) {
-        this.transactions.add(transaction);
-        this.totalAmount = this.totalAmount.add(transaction.getValue());
     }
 
     private void validateValue(BigDecimal value){

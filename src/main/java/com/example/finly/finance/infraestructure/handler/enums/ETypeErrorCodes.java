@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ETypeErrorCodes {
     E5000000(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error without mapped cause."),
+    E4000000(HttpStatus.BAD_REQUEST, "%s"),
     E4000001(HttpStatus.BAD_REQUEST, "An user with this e-mail already exists: %s"),
     E4000002(HttpStatus.BAD_REQUEST, "Bad request to: %s"),
     E4000003(HttpStatus.BAD_REQUEST, "This user not exists: %s"),

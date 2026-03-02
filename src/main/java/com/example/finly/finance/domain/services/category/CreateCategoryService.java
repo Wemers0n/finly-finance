@@ -1,10 +1,9 @@
-package com.example.finly.finance.domain.services;
+package com.example.finly.finance.domain.services.category;
 
 import com.example.finly.finance.application.dtos.in.CategoryInput;
 import com.example.finly.finance.domain.model.User;
 import com.example.finly.finance.domain.repository.UserRepository;
 import com.example.finly.finance.infraestructure.handler.exception.CategoryAlreadyExistsException;
-import com.example.finly.finance.infraestructure.handler.exception.CategoryNotFoundException;
 import com.example.finly.finance.infraestructure.handler.exception.UserNotExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

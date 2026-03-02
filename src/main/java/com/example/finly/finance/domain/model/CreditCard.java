@@ -2,6 +2,7 @@ package com.example.finly.finance.domain.model;
 
 import com.example.finly.finance.domain.model.enums.EBrandCard;
 import com.example.finly.finance.domain.model.enums.EInvoiceStatus;
+import com.example.finly.finance.infraestructure.handler.exception.BusinessException;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -72,13 +73,11 @@ public class CreditCard {
     }
 
     public void authorize(BigDecimal value){
-        if (value == null || value.compareTo(BigDecimal.ZERO) <= 0){
-            throw new RuntimeException("Valor invalido");
-        }
+        validateValue(value);
 
         BigDecimal available = cardLimit.subtract(usedLimit); 
         if (available.compareTo(value) < 0){
-            throw new RuntimeException("Limite do cartão insuficiente");
+            throw new BusinessException("Limite do cartão insuficiente");
         }
 
         this.usedLimit = this.usedLimit.add(value);
@@ -90,6 +89,12 @@ public class CreditCard {
                 .filter(i -> i.getStatus() == EInvoiceStatus.OPEN)
                 .findFirst()
                 .orElseGet(() -> createInvoice(referenceMonth));  // Retorna a existente ou cria uma nova
+    }
+
+    public void closeInvoicesWhenNeeded(LocalDate today){
+        invoices.stream()
+                .filter(invoice -> invoice.shouldClose(today))
+                .forEach(Invoice::closeInvoice);
     }
 
     public Invoice createInvoice(YearMonth referenceMonth) {
@@ -113,6 +118,29 @@ public class CreditCard {
             return month.plusMonths(1);
         }
         return month;
+    }
+
+    public void releaseLimit(BigDecimal value){
+        validateValue(value);
+
+        this.usedLimit = this.usedLimit.subtract(value);
+
+        if (this.usedLimit.compareTo(BigDecimal.ZERO)< 0){
+            this.usedLimit = BigDecimal.ZERO;
+        }
+    }
+
+    public Optional<Invoice> findInvoiceById(UUID invoiceId){
+        return Optional.ofNullable(invoiceId)
+                .flatMap(id -> invoices.stream()
+                        .filter(invoice -> invoice.getId().equals(invoiceId))
+                        .findFirst());
+    }
+
+    private void validateValue(BigDecimal value){
+        if (value == null || value.compareTo(BigDecimal.ZERO) <= 0){
+            throw new RuntimeException("Valor da transação deve ser maior que zero");
+        }
     }
 
     private LocalDate calculateClosingDate(YearMonth referenceMonth) {

@@ -1,7 +1,7 @@
 package com.example.finly.finance.application.controller;
 
 import com.example.finly.finance.application.dtos.in.CreditCardInput;
-import com.example.finly.finance.domain.services.CreateCreditCardService;
+import com.example.finly.finance.domain.services.card.CreateCreditCardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

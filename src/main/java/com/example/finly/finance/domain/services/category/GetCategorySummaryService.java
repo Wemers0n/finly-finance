@@ -1,4 +1,4 @@
-package com.example.finly.finance.domain.services;
+package com.example.finly.finance.domain.services.category;
 
 import com.example.finly.finance.application.dtos.out.CategorySummaryOutput;
 import com.example.finly.finance.domain.model.User;

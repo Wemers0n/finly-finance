@@ -2,8 +2,8 @@ package com.example.finly.finance.application.controller;
 
 import com.example.finly.finance.application.dtos.in.CategoryInput;
 import com.example.finly.finance.application.dtos.out.CategorySummaryOutput;
-import com.example.finly.finance.domain.services.CreateCategoryService;
-import com.example.finly.finance.domain.services.GetCategorySummaryService;
+import com.example.finly.finance.domain.services.category.CreateCategoryService;
+import com.example.finly.finance.domain.services.category.GetCategorySummaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.example.finly.finance.domain.services;
+package com.example.finly.finance.domain.services.account;
 
 import com.example.finly.finance.application.dtos.in.BankAccountInput;
 import com.example.finly.finance.infraestructure.handler.exception.UserNotExistsException;

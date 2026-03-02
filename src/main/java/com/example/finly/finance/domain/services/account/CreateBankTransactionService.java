@@ -1,4 +1,4 @@
-package com.example.finly.finance.domain.services;
+package com.example.finly.finance.domain.services.account;
 
 import com.example.finly.finance.application.dtos.in.BankTransactionInput;
 import com.example.finly.finance.domain.model.BankTransaction;

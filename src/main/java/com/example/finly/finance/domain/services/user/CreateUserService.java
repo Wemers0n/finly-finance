@@ -1,4 +1,4 @@
-package com.example.finly.finance.domain.services;
+package com.example.finly.finance.domain.services.user;
 
 import com.example.finly.finance.application.dtos.in.UserInput;
 import com.example.finly.finance.domain.model.User;

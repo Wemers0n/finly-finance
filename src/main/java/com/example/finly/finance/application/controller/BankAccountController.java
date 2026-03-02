@@ -1,7 +1,7 @@
 package com.example.finly.finance.application.controller;
 
 import com.example.finly.finance.application.dtos.in.BankAccountInput;
-import com.example.finly.finance.domain.services.CreateBankAccountService;
+import com.example.finly.finance.domain.services.account.CreateBankAccountService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -2,7 +2,7 @@ package com.example.finly.finance.application.controller;
 
 import com.example.finly.finance.application.dtos.in.UserInput;
 import com.example.finly.finance.application.dtos.out.UserOutput;
-import com.example.finly.finance.domain.services.CreateUserService;
+import com.example.finly.finance.domain.services.user.CreateUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
