@@ -26,20 +26,24 @@ public class CreateUserServiceTest {
     private CreateUserService createUserService;
 
     @Test
-    void shouldCreateUserTest() throws Exception{
+    void shouldCreateUserTest(){
 
         var userDTO = new UserInput("Joao", "Sousa", "test01@gmail.com", "12345678");
-        var user = new User(userDTO.firstname(), userDTO.lastname(), userDTO.email(), userDTO.password());
-
-        // Simular o id gerado pelo banco
-        var field = User.class.getDeclaredField("id");
-        field.setAccessible(true);
-        field.set(user, UUID.randomUUID());
 
         Mockito.when(userRepository.existsByEmail(userDTO.email()))
                 .thenReturn(false);
+
         Mockito.when(userRepository.save(ArgumentMatchers.any(User.class)))
-                .thenReturn(user);
+                .thenAnswer(invocationOnMock -> {
+                    User user = invocationOnMock.getArgument(0); // Recuperar o usuario passado no save()
+
+                    // Simular o GeneratedValue
+                    var field = User.class.getDeclaredField("id");
+                    field.setAccessible(true);
+                    field.set(user, UUID.randomUUID());
+
+                    return user; // Entidade persistida
+                });
 
         UUID id = createUserService.create(userDTO);
 
