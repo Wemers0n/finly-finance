@@ -30,7 +30,7 @@ public class CreateUserService {
                 input.password()
         );
 
-        this.userRepository.save(user);
-        return user.getId();
+        User savedUser = this.userRepository.save(user);
+        return savedUser.getId();
     }
 }
