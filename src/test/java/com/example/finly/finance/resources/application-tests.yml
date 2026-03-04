@@ -1,0 +1,9 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+  flyway:
+    enable: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true

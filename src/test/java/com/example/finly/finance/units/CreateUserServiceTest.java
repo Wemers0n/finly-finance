@@ -60,5 +60,8 @@ public class CreateUserServiceTest {
         Mockito.when(userRepository.existsByEmail(user.email())).thenReturn(true);
 
         Assertions.assertThrows(EmailAlreadyRegisteredException.class, () -> createUserService.create(user));
+
+        Mockito.verify(userRepository, Mockito.never()).save(ArgumentMatchers.any(User.class));
     }
+
 }
