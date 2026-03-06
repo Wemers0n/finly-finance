@@ -28,7 +28,7 @@ public class CreateBankTransactionService {
     public UUID bankTransaction(BankTransactionInput input){
 
         var account = findBankAccount(input.accountId());
-        var category = findCategory(account.getUserId(), input.categoryName());
+        var category = findCategory(account, input.categoryName());
 
         BankTransaction transaction = new BankTransaction(account, category, input.value(), input.description(), input.operation(), input.transactionType());
         transaction.markAsCompleted();
@@ -50,8 +50,8 @@ public class CreateBankTransactionService {
         return this.bankAccountRepository.findById(accountId).orElseThrow(BankAccountNotFoundException::new);
     }
 
-    private Category findCategory(User user, String category){
-        return user.findCategoryByName(category).orElseThrow(() -> new CategoryNotFoundException("Category does not exist"));
+    private Category findCategory(BankAccount account, String category){
+        return account.findCategoryByName(category).orElseThrow(() -> new CategoryNotFoundException("Category does not exist"));
     }
 
 }

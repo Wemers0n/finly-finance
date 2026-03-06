@@ -1,5 +1,6 @@
 package com.example.finly.finance.application.dtos.out;
 
+import com.example.finly.finance.domain.model.BankAccount;
 import com.example.finly.finance.domain.model.User;
 
 import java.math.BigDecimal;
@@ -14,13 +15,13 @@ public record CategorySummaryOutput(
 
     public record CategoryItem(UUID id, String name, BigDecimal totalSpent){} // Representar cada categoria na lista
 
-    public static CategorySummaryOutput fromEntity(User user){ // Metodo Mapper
-        List<CategoryItem> items = user.getCategories().stream()
+    public static CategorySummaryOutput fromEntity(BankAccount account){ // Metodo Mapper
+        List<CategoryItem> items = account.getCategories().stream()
                 .map(category -> new CategoryItem(category.getId(), category.getName(), category.getTotalSpent()))
                 .toList();
 
         return new CategorySummaryOutput(
-                user.getFirstname(),
+                account.getUserId().getFirstname(),
                 items.size(),
                 items
         );

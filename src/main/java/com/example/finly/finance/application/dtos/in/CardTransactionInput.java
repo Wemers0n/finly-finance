@@ -7,7 +7,6 @@ public record CardTransactionInput(
         UUID cardId,
         String categoryName,
         BigDecimal value,
-        Integer installNumber,
         Integer totalInstallments,
         String description
 ) {}

@@ -1,6 +1,7 @@
 package com.example.finly.finance.domain.model;
 
 import com.example.finly.finance.domain.model.enums.EAccountType;
+import com.example.finly.finance.domain.model.enums.EBrandCard;
 import com.example.finly.finance.infraestructure.handler.exception.TransactionDeniedException;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
@@ -9,8 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "tb_bank_accounts")
@@ -37,6 +37,12 @@ public class BankAccount {
     @Column(name = "current_balance", nullable = false)
     private BigDecimal currentBalance;
 
+    @OneToMany(mappedBy = "bankAccountId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Category> categories = new ArrayList<>();
+
+    @OneToMany(mappedBy = "bankAccountId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CreditCard> creditCards = new ArrayList<>();
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -60,9 +66,54 @@ public class BankAccount {
         this.currentBalance = this.currentBalance.subtract(value);
     }
 
+    public Category addCategory(String name) {
+        validateCategoryName(name);
+        validateCategoryAlreadyExists(name);
+
+        Category category = new Category(this, name);
+        categories.add(category);
+        return category;
+    }
+
+    public Optional<Category> findCategoryByName(String categoryName) {
+        return Optional.ofNullable(categoryName)
+                .filter(name -> !name.isBlank()) // prossegue apenas se não estiver vazia
+                .flatMap(name -> categories.stream()
+                        .filter(category -> category.getName().equalsIgnoreCase(name))
+                        .findFirst());
+    }
+
+    private void validateCategoryName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new RuntimeException("Nome da categoria é obrigatório");
+        }
+    }
+
+    private void validateCategoryAlreadyExists(String name) {
+        boolean exists = categories.stream()
+                .anyMatch(category -> category.getName().equalsIgnoreCase(name));
+
+        if (exists) {
+            throw new RuntimeException("Categoria já existe para este usuário");
+        }
+    }
+
     public void credit(BigDecimal value){
         validateValue(value);
         this.currentBalance = this.currentBalance.add(value);
+    }
+
+    public UUID addCreditCard(String cardName, EBrandCard brand, BigDecimal cardLimit, Integer closingDay, Integer dueDay){
+        CreditCard card = new CreditCard(this, cardName, brand, cardLimit, closingDay, dueDay);
+        creditCards.add(card);
+        return card.getId();
+    }
+
+    public Optional<CreditCard> findCardById(UUID id){
+        return Optional.ofNullable(id)
+                .flatMap(cardId -> creditCards.stream()
+                        .filter(card -> card.getId().equals(cardId))
+                        .findFirst());
     }
 
     private void validateValue(BigDecimal value){

@@ -3,6 +3,7 @@ package com.example.finly.finance.domain.services.card;
 import com.example.finly.finance.application.dtos.in.CreditCardInput;
 import com.example.finly.finance.domain.model.BankAccount;
 import com.example.finly.finance.domain.model.User;
+import com.example.finly.finance.domain.repository.BankAccountRepository;
 import com.example.finly.finance.domain.repository.UserRepository;
 import com.example.finly.finance.infraestructure.handler.exception.BankAccountNotFoundException;
 import com.example.finly.finance.infraestructure.handler.exception.UserNotExistsException;
@@ -17,25 +18,18 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CreateCreditCardService {
 
-    private final UserRepository userRepository;
+    private final BankAccountRepository bankAccountRepository;
 
-    public UUID createCard(UUID userId, CreditCardInput input){
+    public UUID createCard(CreditCardInput input){
 
-        var user = findUser(userId);
-        var account = this.validateBankAccount(user, input);
+//        var user = findUser(userId);
+//        var account = this.validateBankAccount(user, input);
+        BankAccount account = bankAccountRepository.findById(input.bankAccountId()).orElseThrow(BankAccountNotFoundException::new);
 
-        UUID cardId = user.addCreditCard(account, input.cardName(), input.brand(), input.cardLimit(), input.closingDay(), input.dueDay());
+        UUID cardId = account.addCreditCard(input.cardName(), input.brand(), input.cardLimit(), input.closingDay(), input.dueDay());
 
-        this.userRepository.save(user);
+        bankAccountRepository.save(account);
 
         return cardId;
-    }
-
-    private User findUser(UUID userId){
-        return this.userRepository.findById(userId).orElseThrow(UserNotExistsException::new);
-    }
-
-    private BankAccount validateBankAccount(User user, CreditCardInput input){
-        return user.findBankAccountById(input.bankAccountId()).orElseThrow(BankAccountNotFoundException::new);
     }
 }

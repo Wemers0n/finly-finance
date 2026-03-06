@@ -2,10 +2,9 @@ package com.example.finly.finance.domain.services.card;
 
 import com.example.finly.finance.application.dtos.in.CardTransactionInput;
 import com.example.finly.finance.domain.model.*;
-import com.example.finly.finance.domain.repository.UserRepository;
+import com.example.finly.finance.domain.repository.BankAccountRepository;
 import com.example.finly.finance.infraestructure.handler.exception.CategoryNotFoundException;
 import com.example.finly.finance.infraestructure.handler.exception.CreditCardNotFoundException;
-import com.example.finly.finance.infraestructure.handler.exception.UserNotExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,42 +20,30 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CreateCardTransactionService {
 
-    private final UserRepository userRepository;
+    private final BankAccountRepository bankAccountRepository;
 
-    public UUID cardTransaction(UUID userId, CardTransactionInput input){
+    public UUID cardTransaction(CardTransactionInput input){
 
-        User user = this.findUser(userId);
-        CreditCard creditCard = this.findCreditCard(user, input.cardId());
-        Category category = this.findCategory(user, input.categoryName());
+        BankAccount account = bankAccountRepository
+                .findByCreditCardsId(input.cardId())
+                .orElseThrow(CreditCardNotFoundException::new);
 
-        // Autoriza no domínio antes de qualquer persistência
-        // Garante que não será criada transação sem limite disponível
+        CreditCard creditCard = account.findCardById(input.cardId())
+                .orElseThrow(CreditCardNotFoundException::new);
+
+        Category category = account.findCategoryByName(input.categoryName())
+                .orElseThrow(CategoryNotFoundException::new);
+
         creditCard.authorize(input.value());
 
-        this.createInstallments(creditCard, category, input);
+        var id = createInstallments(creditCard, category, input);
 
-        // persistencia via cascade
-        this.userRepository.save(user);
-
-        return creditCard.getId();
+//        this.bankAccountRepository.save(account);
+        
+        return id;
     }
 
-    private User findUser(UUID userId){
-        return userRepository.findById(userId)
-                .orElseThrow(UserNotExistsException::new);
-    }
-
-    private CreditCard findCreditCard(User user, UUID cardId){
-        return user.findCardById(cardId)
-                .orElseThrow(CreditCardNotFoundException::new);
-    }
-
-    private Category findCategory(User user, String categoryName){
-        return user.findCategoryByName(categoryName)
-                .orElseThrow(CategoryNotFoundException::new);
-    }
-
-    private void createInstallments(CreditCard creditCard, Category category, CardTransactionInput input){
+    private UUID createInstallments(CreditCard creditCard, Category category, CardTransactionInput input){
 
         // Resolve o mês da fatura base considerando o dia de fechamento do cartão.
         // Ex:
@@ -72,8 +59,8 @@ public class CreateCardTransactionService {
         // Usa escala 2 e HALF_EVEN para evitar distorções financeiras
         BigDecimal installmentValue = totalValue.divide(BigDecimal.valueOf(totalInstallments), 2, RoundingMode.HALF_EVEN);
         BigDecimal remainder = totalValue.subtract(installmentValue.multiply(BigDecimal.valueOf(totalInstallments)));
-
-
+        
+        UUID transactionId = null;
         // Cria e salva as parcelas
         for (int i = 1; i <= totalInstallments; i++){
             var currentInstallmentsValue = (i ==1) ? installmentValue.add(remainder) : installmentValue;
@@ -98,9 +85,12 @@ public class CreateCardTransactionService {
                     totalInstallments,
                     input.description()
             );
-
+            
             invoice.addTransaction(installmentTransaction);
             category.addTransaction(installmentTransaction);
+
+            transactionId = installmentTransaction.getId();
         }
+        return transactionId;
     }
 }

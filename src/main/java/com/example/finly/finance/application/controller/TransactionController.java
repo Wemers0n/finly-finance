@@ -29,9 +29,9 @@ public class TransactionController {
         return ResponseEntity.created(locationTransactionBankUri).build();
     }
 
-    @PostMapping("/card/{userId}")
-    public ResponseEntity<Void> createCardTransaction(@PathVariable UUID userId, @RequestBody CardTransactionInput input) {
-        UUID transactionCardId = cardTransactionService.cardTransaction(userId, input);
+    @PostMapping("/card")
+    public ResponseEntity<Void> createCardTransaction(@RequestBody CardTransactionInput input) {
+        UUID transactionCardId = cardTransactionService.cardTransaction(input);
         URI locationTransactionCardUri = UriUtils.buildLocationUri(transactionCardId);
 
         return ResponseEntity.created(locationTransactionCardUri).build();

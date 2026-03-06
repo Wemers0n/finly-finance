@@ -21,7 +21,7 @@ import java.util.UUID;
 public abstract class Transaction {
 
     @Id
-    @GeneratedValue
+//    @GeneratedValue
     @EqualsAndHashCode.Include
     private UUID id;
 
@@ -54,6 +54,7 @@ public abstract class Transaction {
                        ETransactionOriginType originType,
                        BigDecimal value,
                        String description) {
+        this.id = UUID.randomUUID();
         this.accountId = Objects.requireNonNull(accountId);
         this.categoryId = Objects.requireNonNull(categoryId);
         this.originType = Objects.requireNonNull(originType);

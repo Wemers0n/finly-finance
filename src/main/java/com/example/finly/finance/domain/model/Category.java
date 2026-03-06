@@ -23,8 +23,8 @@ public class Category {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User userId;
+    @JoinColumn(name = "account_id", nullable = false)
+    private BankAccount bankAccountId;
 
     @Column(nullable = false, length = 50)
     private String name;
@@ -32,15 +32,15 @@ public class Category {
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal totalSpent = BigDecimal.ZERO; // campo derivado
 
-    @OneToMany(mappedBy = "categoryId")
+    @OneToMany(mappedBy = "categoryId", cascade = CascadeType.ALL)
     private List<Transaction> transactions = new ArrayList<>();
 
     @OneToMany(mappedBy = "categoryId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Budget> budgets = new ArrayList<>();
 
-    public Category(User userId, String name){
+    public Category(BankAccount bankAccountId, String name){
         this.id = UUID.randomUUID();
-        this.userId = Objects.requireNonNull(userId);
+        this.bankAccountId = Objects.requireNonNull(bankAccountId);
         this.name = Objects.requireNonNull(name);
     }
 

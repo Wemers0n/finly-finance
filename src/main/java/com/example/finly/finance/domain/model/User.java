@@ -42,13 +42,7 @@ public class User {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Category> categories = new ArrayList<>();
-
-    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BankAccount> bankAccounts = new ArrayList<>();
-
-    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CreditCard> creditCards = new ArrayList<>();
 
     @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Budget> budgets = new ArrayList<>();
@@ -74,51 +68,6 @@ public class User {
         return Optional.ofNullable(accountId)
                 .flatMap(id -> bankAccounts.stream()
                         .filter(account -> account.getId().equals(id))
-                        .findFirst());
-    }
-
-    public Category addCategory(String name) {
-        validateCategoryName(name);
-        validateCategoryAlreadyExists(name);
-
-        Category category = new Category(this, name);
-        categories.add(category);
-        return category;
-    }
-
-    public Optional<Category> findCategoryByName(String categoryName) {
-        return Optional.ofNullable(categoryName)
-                .filter(name -> !name.isBlank()) // prossegue apenas se não estiver vazia
-                .flatMap(name -> categories.stream()
-                        .filter(category -> category.getName().equalsIgnoreCase(name))
-                        .findFirst());
-    }
-
-    private void validateCategoryName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new RuntimeException("Nome da categoria é obrigatório");
-        }
-    }
-
-    private void validateCategoryAlreadyExists(String name) {
-        boolean exists = categories.stream()
-                .anyMatch(category -> category.getName().equalsIgnoreCase(name));
-
-        if (exists) {
-            throw new RuntimeException("Categoria já existe para este usuário");
-        }
-    }
-
-    public UUID addCreditCard(BankAccount accountId, String cardName, EBrandCard brand, BigDecimal cardLimit, Integer closingDay, Integer dueDay){
-        CreditCard card = new CreditCard(this, accountId, cardName, brand, cardLimit, closingDay, dueDay);
-        creditCards.add(card);
-        return card.getId();
-    }
-
-    public Optional<CreditCard> findCardById(UUID id){
-        return Optional.ofNullable(id)
-                .flatMap(cardId -> creditCards.stream()
-                        .filter(card -> card.getId().equals(cardId))
                         .findFirst());
     }
 

@@ -1,8 +1,11 @@
 package com.example.finly.finance.domain.services.category;
 
 import com.example.finly.finance.application.dtos.in.CategoryInput;
+import com.example.finly.finance.domain.model.BankAccount;
 import com.example.finly.finance.domain.model.User;
+import com.example.finly.finance.domain.repository.BankAccountRepository;
 import com.example.finly.finance.domain.repository.UserRepository;
+import com.example.finly.finance.infraestructure.handler.exception.BankAccountNotFoundException;
 import com.example.finly.finance.infraestructure.handler.exception.CategoryAlreadyExistsException;
 import com.example.finly.finance.infraestructure.handler.exception.UserNotExistsException;
 import lombok.RequiredArgsConstructor;
@@ -16,25 +19,25 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CreateCategoryService {
 
-    private final UserRepository userRepository;
+    private final BankAccountRepository bankAccountRepository;
 
-    public String createCategory(UUID userId, CategoryInput input){
+    public String createCategory(UUID accountId, CategoryInput input){
 
-        var user = validateUser(userId);
+        var user = validateAccount(accountId);
         validateCategory(user, input);
 
         user.addCategory(input.name());
 
-        this.userRepository.save(user);
+        this.bankAccountRepository.save(user);
         return input.name();
     }
 
-    private User validateUser(UUID userId){
-        return userRepository.findById(userId).orElseThrow(UserNotExistsException::new);
+    private BankAccount validateAccount(UUID accountId){
+        return bankAccountRepository.findById(accountId).orElseThrow(BankAccountNotFoundException::new);
     }
 
-    private void validateCategory(User user, CategoryInput input) {
-        if (user.findCategoryByName(input.name()).isPresent()) {
+    private void validateCategory(BankAccount account, CategoryInput input) {
+        if (account.findCategoryByName(input.name()).isPresent()) {
             throw new CategoryAlreadyExistsException();
         }
     }
