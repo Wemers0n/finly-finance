@@ -24,8 +24,8 @@ public class Budget {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User userId;
+    @JoinColumn(name = "account_id", nullable = false)
+    private BankAccount bankAccountId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
@@ -49,9 +49,9 @@ public class Budget {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Budget(User userId, Category categoryId, BigDecimal amountLimit, LocalDate referenceMonth, Integer alertPercentage, Boolean active){
+    public Budget(BankAccount bankAccountId, Category categoryId, BigDecimal amountLimit, LocalDate referenceMonth, Integer alertPercentage, Boolean active){
         this.id = UUID.randomUUID();
-        this.userId = Objects.requireNonNull(userId);
+        this.bankAccountId = Objects.requireNonNull(bankAccountId);
         this.categoryId = Objects.requireNonNull(categoryId);
         this.amountLimit = Objects.requireNonNull(amountLimit);
         this.referenceMonth = Objects.requireNonNull(referenceMonth);

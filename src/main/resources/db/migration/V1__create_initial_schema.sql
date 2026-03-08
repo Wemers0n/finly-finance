@@ -53,7 +53,7 @@ CREATE TABLE tb_categories(
 
 CREATE TABLE tb_budgets(
     id               UUID PRIMARY KEY,
-    user_id          UUID           NOT NULL,
+    account_id       UUID           NOT NULL,
     category_id      UUID           NOT NULL,
     amount_limit     DECIMAL(12, 2) NOT NULL,
     reference_month  DATE           NOT NULL,
@@ -62,8 +62,8 @@ CREATE TABLE tb_budgets(
     created_at       TIMESTAMP      NOT NULL,
     updated_at       TIMESTAMP      NOT NULL,
 
-    CONSTRAINT fk_budget_user
-        FOREIGN KEY (user_id) REFERENCES tb_users (id) ON DELETE CASCADE,
+    CONSTRAINT fk_budget_account
+        FOREIGN KEY (account_id) REFERENCES tb_bank_accounts (id) ON DELETE CASCADE,
 
     CONSTRAINT fk_budget_category
         FOREIGN KEY (category_id) REFERENCES tb_categories (id) ON DELETE CASCADE
