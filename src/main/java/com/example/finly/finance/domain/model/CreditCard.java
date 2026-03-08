@@ -139,7 +139,7 @@ public class CreditCard {
 
     private void validateValue(BigDecimal value){
         if (value == null || value.compareTo(BigDecimal.ZERO) <= 0){
-            throw new RuntimeException("Valor da transação deve ser maior que zero");
+            throw new BusinessException("Valor da transação deve ser maior que zero");
         }
     }
 

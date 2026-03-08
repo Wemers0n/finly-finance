@@ -14,7 +14,8 @@ public enum ETypeErrorCodes {
     E4000005(HttpStatus.BAD_REQUEST, "Transaction denied: %s"),
     E4000006(HttpStatus.BAD_REQUEST, "This category does not exists."),
     E4000007(HttpStatus.BAD_REQUEST, "This category already exists."),
-    E4000008(HttpStatus.BAD_REQUEST, "This credCard does not exists.");
+    E4000008(HttpStatus.BAD_REQUEST, "This credCard does not exists."),
+    E4000009(HttpStatus.BAD_REQUEST, "This invoice does not exist.");
 
 
     private final HttpStatus status;

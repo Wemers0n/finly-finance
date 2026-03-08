@@ -1,6 +1,7 @@
 package com.example.finly.finance.domain.model;
 
 import com.example.finly.finance.domain.model.enums.EInvoiceStatus;
+import com.example.finly.finance.infraestructure.handler.exception.BusinessException;
 import jakarta.persistence.*;
 
 import lombok.EqualsAndHashCode;
@@ -85,14 +86,14 @@ public class Invoice {
     }
     public void markAsPaid(){
         if (!isPayable()){
-            throw new IllegalStateException("A Fatura nao esta fechada para pagamento");
+            throw new BusinessException("A fatura não está fechada para pagamento");
         }
         this.status = EInvoiceStatus.PAID;
     }
 
     public void closeInvoice(){
         if (this.status != EInvoiceStatus.OPEN){
-            throw new RuntimeException("Fatura não pode ser fechada");
+            throw new BusinessException("Fatura não pode ser fechada");
         }
 
         this.status = EInvoiceStatus.CLOSED;
@@ -100,7 +101,7 @@ public class Invoice {
 
     private void validateValue(BigDecimal value){
         if (value == null || value.compareTo(BigDecimal.ZERO) <= 0){
-            throw new RuntimeException("Valor da transação deve ser maior que zero");
+            throw new BusinessException("Valor da transação deve ser maior que zero");
         }
     }
 

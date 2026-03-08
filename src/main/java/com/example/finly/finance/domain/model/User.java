@@ -44,8 +44,8 @@ public class User {
     @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BankAccount> bankAccounts = new ArrayList<>();
 
-    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Budget> budgets = new ArrayList<>();
+//    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Budget> budgets = new ArrayList<>();
 
 
     public User(String firstname, String lastname, String email, String password){

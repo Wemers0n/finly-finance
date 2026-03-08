@@ -22,7 +22,7 @@ public class CreateCardTransactionService {
 
     private final BankAccountRepository bankAccountRepository;
 
-    public UUID cardTransaction(CardTransactionInput input){
+    public UUID cardTransaction(CardTransactionInput input) {
 
         BankAccount account = bankAccountRepository
                 .findByCreditCardsId(input.cardId())
@@ -36,43 +36,42 @@ public class CreateCardTransactionService {
 
         creditCard.authorize(input.value());
 
-        var id = createInstallments(creditCard, category, input);
-
-//        this.bankAccountRepository.save(account);
-        
-        return id;
+        // Recurso de cascade do jpa com o transactional
+        return createInstallments(creditCard, category, input, LocalDate.now());
     }
 
-    private UUID createInstallments(CreditCard creditCard, Category category, CardTransactionInput input){
-
-        // Resolve o mês da fatura base considerando o dia de fechamento do cartão.
-        // Ex:
-        // - compra antes do fechamento → fatura do mês atual
-        // - compra após o fechamento → próxima fatura
-        LocalDate purchaseDate = LocalDate.now();
+    private UUID createInstallments(
+            CreditCard creditCard,
+            Category category,
+            CardTransactionInput input,
+            LocalDate purchaseDate
+    ) {
         YearMonth baseInvoiceMonth = creditCard.invoiceMonth(purchaseDate);
 
         BigDecimal totalValue = input.value();
-        Integer totalInstallments = input.totalInstallments();
+        int totalInstallments = input.totalInstallments();
 
-        // Divide o valor total em parcelas iguais.
-        // Usa escala 2 e HALF_EVEN para evitar distorções financeiras
-        BigDecimal installmentValue = totalValue.divide(BigDecimal.valueOf(totalInstallments), 2, RoundingMode.HALF_EVEN);
-        BigDecimal remainder = totalValue.subtract(installmentValue.multiply(BigDecimal.valueOf(totalInstallments)));
-        
-        UUID transactionId = null;
-        // Cria e salva as parcelas
-        for (int i = 1; i <= totalInstallments; i++){
-            var currentInstallmentsValue = (i ==1) ? installmentValue.add(remainder) : installmentValue;
+        BigDecimal installmentsCount = BigDecimal.valueOf(totalInstallments);
 
-            // Cada parcela pertence a uma fatura diferente:
-            // - parcela 1 → fatura base
-            // - parcela 2 → mês seguinte
-            // - parcela N → base + (N - 1)
-            YearMonth invoiceMonth = baseInvoiceMonth.plusMonths(i - 1);
+        // Valor base de cada parcela com arredondamento
+        BigDecimal baseInstallmentValue = totalValue
+                .divide(installmentsCount, 2, RoundingMode.HALF_EVEN);
 
-            // Reutiliza a fatura aberta do mês ou cria uma nova se não existir.
-            // Garante que exista no máximo uma fatura aberta por mêsr
+        // Qualquer resto de arredondamento é adicionado à primeira parcela
+        BigDecimal remainder = totalValue.subtract(
+                baseInstallmentValue.multiply(installmentsCount)
+        );
+
+        UUID lastTransactionId = null;
+
+        for (int installmentNumber = 1; installmentNumber <= totalInstallments; installmentNumber++) {
+
+            BigDecimal currentInstallmentValue = (installmentNumber == 1)
+                    ? baseInstallmentValue.add(remainder)
+                    : baseInstallmentValue;
+
+            YearMonth invoiceMonth = baseInvoiceMonth.plusMonths(installmentNumber - 1);
+
             Invoice invoice = creditCard.findOpenInvoice(invoiceMonth);
 
             CardTransaction installmentTransaction = new CardTransaction(
@@ -80,17 +79,18 @@ public class CreateCardTransactionService {
                     creditCard,
                     category,
                     invoice,
-                    currentInstallmentsValue,
-                    i, // numero da parcela
+                    currentInstallmentValue,
+                    installmentNumber,
                     totalInstallments,
                     input.description()
             );
-            
+
             invoice.addTransaction(installmentTransaction);
             category.addTransaction(installmentTransaction);
 
-            transactionId = installmentTransaction.getId();
+            lastTransactionId = installmentTransaction.getId();
         }
-        return transactionId;
+
+        return lastTransactionId;
     }
 }

@@ -2,6 +2,7 @@ package com.example.finly.finance.domain.model;
 
 import com.example.finly.finance.domain.model.enums.EAccountType;
 import com.example.finly.finance.domain.model.enums.EBrandCard;
+import com.example.finly.finance.infraestructure.handler.exception.BusinessException;
 import com.example.finly.finance.infraestructure.handler.exception.TransactionDeniedException;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
@@ -42,6 +43,9 @@ public class BankAccount {
 
     @OneToMany(mappedBy = "bankAccountId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CreditCard> creditCards = new ArrayList<>();
+
+    @OneToMany(mappedBy = "bankAccountId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Budget> budgets = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -114,6 +118,28 @@ public class BankAccount {
                 .flatMap(cardId -> creditCards.stream()
                         .filter(card -> card.getId().equals(cardId))
                         .findFirst());
+    }
+
+    public void payCreditCardInvoice(Invoice invoice) {
+        Objects.requireNonNull(invoice, "invoice must not be null");
+
+        CreditCard card = invoice.getCreditCardId();
+
+        if (!this.equals(card.getBankAccountId())) {
+            throw new BusinessException("Fatura não pertence a esta conta bancária");
+        }
+
+        if (!invoice.isPayable()) {
+            throw new BusinessException("Fatura não está disponível para pagamento");
+        }
+
+        BigDecimal totalAmount = invoice.getTotalAmount();
+
+        this.debit(totalAmount);
+        card.releaseLimit(totalAmount);
+
+        invoice.markAsPaid();
+        invoice.getTransactions().forEach(Transaction::markAsCompleted);
     }
 
     private void validateValue(BigDecimal value){
