@@ -11,6 +11,7 @@ import com.example.finly.finance.domain.repository.TransactionRepository;
 import com.example.finly.finance.infraestructure.handler.exception.BankAccountNotFoundException;
 import com.example.finly.finance.infraestructure.handler.exception.CategoryNotFoundException;
 import com.example.finly.finance.infraestructure.handler.exception.TransactionDeniedException;
+import com.example.finly.finance.domain.services.budget.BudgetLimitValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,7 @@ public class CreateBankTransactionService {
 
     private final BankAccountRepository bankAccountRepository;
     private final TransactionRepository transactionRepository;
+    private final BudgetLimitValidator budgetLimitValidator;
 
     public UUID bankTransaction(BankTransactionInput input){
 
@@ -31,11 +33,17 @@ public class CreateBankTransactionService {
         var category = findCategory(account, input.categoryName());
 
         BankTransaction transaction = new BankTransaction(account, category, input.value(), input.description(), input.operation(), input.transactionType());
+
+        var referenceMonth = java.time.YearMonth.from(transaction.getTransactionDate().toLocalDate());
+        var alreadySpent = budgetLimitValidator.calculateMonthlySpent(category, referenceMonth);
+        var projectedTotal = alreadySpent.add(transaction.getValue());
+        budgetLimitValidator.validate(category, projectedTotal, referenceMonth);
+
         transaction.markAsCompleted();
         category.addTransaction(transaction);
 
         applyTransaction(account, transaction);
-        this.transactionRepository.save(transaction);
+//        this.transactionRepository.save(transaction);
         return transaction.getId();
     }
 

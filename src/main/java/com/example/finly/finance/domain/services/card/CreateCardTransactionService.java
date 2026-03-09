@@ -3,6 +3,7 @@ package com.example.finly.finance.domain.services.card;
 import com.example.finly.finance.application.dtos.in.CardTransactionInput;
 import com.example.finly.finance.domain.model.*;
 import com.example.finly.finance.domain.repository.BankAccountRepository;
+import com.example.finly.finance.domain.services.budget.BudgetLimitValidator;
 import com.example.finly.finance.infraestructure.handler.exception.CategoryNotFoundException;
 import com.example.finly.finance.infraestructure.handler.exception.CreditCardNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class CreateCardTransactionService {
 
     private final BankAccountRepository bankAccountRepository;
+    private final BudgetLimitValidator budgetLimitValidator;
 
     public UUID cardTransaction(CardTransactionInput input) {
 
@@ -33,6 +35,11 @@ public class CreateCardTransactionService {
 
         Category category = account.findCategoryByName(input.categoryName())
                 .orElseThrow(CategoryNotFoundException::new);
+
+        var referenceMonth = YearMonth.from(LocalDate.now());
+        var alreadySpent = budgetLimitValidator.calculateMonthlySpent(category, referenceMonth);
+        var projectedTotal = alreadySpent.add(input.value());
+        budgetLimitValidator.validate(category, projectedTotal, referenceMonth);
 
         creditCard.authorize(input.value());
 
