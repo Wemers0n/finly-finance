@@ -133,12 +133,16 @@ public class BankAccount {
             throw new BusinessException("Fatura não está disponível para pagamento");
         }
 
-        BigDecimal totalAmount = invoice.getTotalAmount();
+        BigDecimal amountToPay = invoice.remainingAmount();
 
-        this.debit(totalAmount);
-        card.releaseLimit(totalAmount);
+        if (amountToPay.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException("Fatura já está totalmente paga");
+        }
 
-        invoice.markAsPaid();
+        this.debit(amountToPay);
+        card.releaseLimit(amountToPay);
+
+        invoice.registerPayment(amountToPay);
         invoice.getTransactions().forEach(Transaction::markAsCompleted);
     }
 

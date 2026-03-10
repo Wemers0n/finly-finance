@@ -84,11 +84,31 @@ public class Invoice {
     public BigDecimal remainingAmount(){
         return totalAmount.subtract(amountPaid);
     }
-    public void markAsPaid(){
-        if (!isPayable()){
+
+    public void registerPayment(BigDecimal paymentAmount) {
+        if (!isPayable()) {
             throw new BusinessException("A fatura não está fechada para pagamento");
         }
-        this.status = EInvoiceStatus.PAID;
+
+        if (paymentAmount == null || paymentAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException("Valor do pagamento deve ser maior que zero");
+        }
+
+        BigDecimal remaining = remainingAmount();
+
+        if (remaining.compareTo(BigDecimal.ZERO) == 0) {
+            throw new BusinessException("Fatura já está totalmente paga");
+        }
+
+        if (paymentAmount.compareTo(remaining) > 0) {
+            throw new BusinessException("Valor do pagamento não pode ser maior que o saldo da fatura");
+        }
+
+        this.amountPaid = this.amountPaid.add(paymentAmount);
+
+        if (remainingAmount().compareTo(BigDecimal.ZERO) == 0) {
+            this.status = EInvoiceStatus.PAID;
+        }
     }
 
     public void closeInvoice(){

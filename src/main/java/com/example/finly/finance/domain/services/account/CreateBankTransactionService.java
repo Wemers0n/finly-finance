@@ -2,12 +2,10 @@ package com.example.finly.finance.domain.services.account;
 
 import com.example.finly.finance.application.dtos.in.BankTransactionInput;
 import com.example.finly.finance.domain.model.BankTransaction;
-import com.example.finly.finance.domain.model.User;
 import com.example.finly.finance.domain.model.enums.EBalanceOperation;
 import com.example.finly.finance.domain.model.BankAccount;
 import com.example.finly.finance.domain.model.Category;
 import com.example.finly.finance.domain.repository.BankAccountRepository;
-import com.example.finly.finance.domain.repository.TransactionRepository;
 import com.example.finly.finance.infraestructure.handler.exception.BankAccountNotFoundException;
 import com.example.finly.finance.infraestructure.handler.exception.CategoryNotFoundException;
 import com.example.finly.finance.infraestructure.handler.exception.TransactionDeniedException;
@@ -24,7 +22,6 @@ import java.util.UUID;
 public class CreateBankTransactionService {
 
     private final BankAccountRepository bankAccountRepository;
-    private final TransactionRepository transactionRepository;
     private final BudgetLimitValidator budgetLimitValidator;
 
     public UUID bankTransaction(BankTransactionInput input){
