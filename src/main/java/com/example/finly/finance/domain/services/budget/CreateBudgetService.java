@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.UUID;
 
 @Service
@@ -29,10 +30,12 @@ public class CreateBudgetService {
         BankAccount account = findBankAccount(input.accountId());
         Category category = findCategory(account, input.categoryName());
 
-        BigDecimal amountLimit = input.amountLimit();
-        LocalDate referenceMonth = input.referenceMonth();
-        Integer alertPercentage = input.alertPercentage() != null ? input.alertPercentage() : DEFAULT_ALERT_PERCENTAGE;
-        Boolean active = input.active() != null ? input.active() : Boolean.TRUE;
+        BigDecimal amountLimit = validateAmountLimit(input.amountLimit());
+        LocalDate referenceMonth = normalizeReferenceMonth(input.referenceMonth());
+        Integer alertPercentage = resolveAlertPercentage(input.alertPercentage());
+        Boolean active = resolveActiveFlag(input.active());
+
+        ensureNoDuplicateBudgetForMonth(category, referenceMonth);
 
         Budget budget = new Budget(account, category, amountLimit, referenceMonth, alertPercentage, active);
 
@@ -41,6 +44,48 @@ public class CreateBudgetService {
         bankAccountRepository.save(account);
 
         return budgetId;
+    }
+
+    private BigDecimal validateAmountLimit(BigDecimal amountLimit) {
+        if (amountLimit == null || amountLimit.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Budget amountLimit must be greater than zero");
+        }
+        return amountLimit;
+    }
+
+    private LocalDate normalizeReferenceMonth(LocalDate referenceMonth) {
+        if (referenceMonth == null) {
+            throw new IllegalArgumentException("Budget referenceMonth is required");
+        }
+        return referenceMonth.withDayOfMonth(1);
+    }
+
+    private Integer resolveAlertPercentage(Integer alertPercentage) {
+        var resolved = alertPercentage != null ? alertPercentage : DEFAULT_ALERT_PERCENTAGE;
+        if (resolved <= 0 || resolved > 100) {
+            throw new IllegalArgumentException("Budget alertPercentage must be between 1 and 100");
+        }
+        return resolved;
+    }
+
+    private Boolean resolveActiveFlag(Boolean active) {
+        return active != null ? active : Boolean.TRUE;
+    }
+
+    private void ensureNoDuplicateBudgetForMonth(Category category, LocalDate referenceMonth) {
+        YearMonth targetMonth = YearMonth.from(referenceMonth);
+
+        boolean hasActiveBudgetForMonth = category.getBudgets().stream()
+                .filter(Budget::getActive)
+                .anyMatch(budget -> YearMonth.from(budget.getReferenceMonth()).equals(targetMonth));
+
+        if (hasActiveBudgetForMonth) {
+            throw new IllegalArgumentException(String.format(
+                    "Active budget already exists for category '%s' in %s",
+                    category.getName(),
+                    targetMonth
+            ));
+        }
     }
 
     private BankAccount findBankAccount(UUID accountId) {
