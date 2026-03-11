@@ -10,6 +10,7 @@ public record MonthlyTransactionSummaryOutput(
         UUID accountId,
         LocalDate referenceMonth,
         BigDecimal totalDebits,      // gastos totais
+        BigDecimal totalCredits,     // entradas totais
         BigDecimal totalTransactionsBank,    // compras pelo banco
         BigDecimal totalTransactionsCard,    // compras no cartão
         BigDecimal monthlyBalance,

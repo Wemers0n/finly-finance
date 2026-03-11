@@ -5,6 +5,7 @@ import com.example.finly.finance.domain.model.BankTransaction;
 import com.example.finly.finance.domain.model.CardTransaction;
 import com.example.finly.finance.domain.model.Transaction;
 import com.example.finly.finance.domain.model.enums.EBalanceOperation;
+import com.example.finly.finance.domain.model.enums.EBankTransactionType;
 import com.example.finly.finance.domain.repository.BankAccountRepository;
 import com.example.finly.finance.domain.repository.TransactionRepository;
 import com.example.finly.finance.infraestructure.handler.exception.BankAccountNotFoundException;
@@ -85,6 +86,7 @@ public class GetMonthlyTransactionSummaryService {
                 account.getId(),
                 yearMonth.atDay(1),     // mês de referência
                 totalDebits,                       // total de débitos
+                bankCredits,                       // total de entradas
                 totalTransactionsBank,             // total de débitos bancários
                 totalTransactionsCard,             // total de débitos no cartão
                 monthlyBalance,                    // saldo final do mês
@@ -109,7 +111,7 @@ public class GetMonthlyTransactionSummaryService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    // Soma o valor de todos os créditos recebidos via transação bancária
+    // Soma o valor de todos os créditos recebidos via transação bancária (inclui depósitos)
     private BigDecimal sumBankCredits(List<Transaction> transactions) {
         return transactions.stream()
                 .filter(transaction -> transaction instanceof BankTransaction bankTransaction
