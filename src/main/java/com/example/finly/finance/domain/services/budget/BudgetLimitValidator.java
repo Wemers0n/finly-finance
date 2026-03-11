@@ -3,6 +3,9 @@ package com.example.finly.finance.domain.services.budget;
 import com.example.finly.finance.domain.model.Budget;
 import com.example.finly.finance.domain.model.Category;
 import com.example.finly.finance.domain.model.Transaction;
+import com.example.finly.finance.domain.model.BankTransaction;
+import com.example.finly.finance.domain.model.enums.EBalanceOperation;
+import com.example.finly.finance.domain.model.enums.EBankTransactionType;
 import com.example.finly.finance.infraestructure.handler.exception.TransactionDeniedException;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +19,7 @@ public class BudgetLimitValidator {
     public BigDecimal calculateMonthlySpent(Category category, YearMonth referenceMonth) {
         return category.getTransactions().stream()
                 .filter(transaction -> isSameYearMonth(transaction.getTransactionDate().toLocalDate(), referenceMonth))
+                .filter(this::isExpenseTransaction)
                 .map(Transaction::getValue)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
@@ -39,6 +43,22 @@ public class BudgetLimitValidator {
                             category.getName(), referenceMonth)
             );
         }
+    }
+
+    private boolean isExpenseTransaction(Transaction transaction) {
+        if (transaction instanceof BankTransaction) {
+            BankTransaction bankTransaction = (BankTransaction) transaction;
+
+            // Depósitos (entrada de dinheiro) não entram no orçamento
+            if (bankTransaction.getTransactionType() == EBankTransactionType.DEPOSIT) {
+                return false;
+            }
+
+            // Demais transações bancárias contam como despesa apenas se forem débito
+            return bankTransaction.getOperation() == EBalanceOperation.DEBIT;
+        }
+        // Outras transações (como cartão) são sempre despesas
+        return true;
     }
 
     private boolean isSameYearMonth(LocalDate date, YearMonth referenceMonth) {

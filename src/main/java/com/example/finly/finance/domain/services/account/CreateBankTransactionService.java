@@ -29,26 +29,41 @@ public class CreateBankTransactionService {
         var account = findBankAccount(input.accountId());
         var category = findCategory(account, input.categoryName());
 
-        BankTransaction transaction = new BankTransaction(account, category, input.value(), input.description(), input.operation(), input.transactionType());
+        BankTransaction transaction = new BankTransaction(
+                account,
+                category,
+                input.value(),
+                input.description(),
+                input.operation(),
+                input.transactionType()
+        );
 
-        var referenceMonth = java.time.YearMonth.from(transaction.getTransactionDate().toLocalDate());
-        var alreadySpent = budgetLimitValidator.calculateMonthlySpent(category, referenceMonth);
-        var projectedTotal = alreadySpent.add(transaction.getValue());
-        budgetLimitValidator.validate(category, projectedTotal, referenceMonth);
+        if (input.operation() == EBalanceOperation.DEBIT) {
+            var referenceMonth = java.time.YearMonth.from(transaction.getTransactionDate().toLocalDate());
+            var alreadySpent = budgetLimitValidator.calculateMonthlySpent(category, referenceMonth);
+            var projectedTotal = alreadySpent.add(transaction.getValue());
+            budgetLimitValidator.validate(category, projectedTotal, referenceMonth);
+        }
 
         transaction.markAsCompleted();
         category.addTransaction(transaction);
-
         applyTransaction(account, transaction);
 //        this.transactionRepository.save(transaction);
         return transaction.getId();
     }
 
     private void applyTransaction(BankAccount account, BankTransaction transaction){
-        if (!(transaction.getOperation() == EBalanceOperation.DEBIT)){
+        if (transaction.getOperation() == EBalanceOperation.DEBIT){
+            account.debit(transaction.getValue());
+            return;
+        }
+        if (transaction.getOperation() == EBalanceOperation.CREDIT) {
+            account.credit(transaction.getValue());
+            return;
+        }
+        {
             throw new TransactionDeniedException();
         }
-        account.debit(transaction.getValue());
     }
 
     private BankAccount findBankAccount(UUID accountId){
