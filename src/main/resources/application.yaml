@@ -22,3 +22,7 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+api:
+  security:
+    token:
+      secret: finly-secret-key-token
