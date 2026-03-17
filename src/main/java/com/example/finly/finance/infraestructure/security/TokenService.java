@@ -4,11 +4,13 @@ import com.auth0.jwt.*;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.finly.finance.domain.model.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
+import java.util.UUID;
 
 @Service
 public class TokenService {
@@ -16,7 +18,7 @@ public class TokenService {
     @Value("${api.security.token.secret}")
     private String secretKey;
 
-    public String generateToken(User user){
+    public String generateToken(UUID userId, String email){
 
         try {
 
@@ -24,8 +26,8 @@ public class TokenService {
 
             return JWT.create()
                     .withIssuer("finly-finance")
-                    .withSubject(user.getEmail())
-                    .withClaim("userId", user.getId().toString())
+                    .withSubject(email)
+                    .withClaim("userId", userId.toString())
                     .withExpiresAt(generateExpirationDate())
                     .sign(algorithm);
 
@@ -34,7 +36,7 @@ public class TokenService {
         }
     }
 
-    public String validateToken(String token){
+    public DecodedJWT validateToken(String token){
 
         try {
 
@@ -43,8 +45,7 @@ public class TokenService {
             return JWT.require(algorithm)
                     .withIssuer("finly-finance")
                     .build()
-                    .verify(token)
-                    .getSubject();
+                    .verify(token);
 
         } catch (JWTVerificationException exception){
             return null;

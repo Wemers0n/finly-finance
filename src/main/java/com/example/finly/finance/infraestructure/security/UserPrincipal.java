@@ -1,6 +1,7 @@
 package com.example.finly.finance.infraestructure.security;
 
 import com.example.finly.finance.domain.model.User;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,10 +12,26 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class UserPrincipal implements UserDetails {
 
-    private final User user;
+    // private final User user;
+
+    private final UUID id;
+    private final String email;
+    private final String password;
+
+    public UserPrincipal(User user){
+        this.id = user.getId();
+        this.email = user.getEmail();
+        this.password = user.getPassword();
+    }
+
+    public UserPrincipal(UUID id, String email){
+        this.id = id;
+        this.email = email;
+        this.password = null;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -25,12 +42,12 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public @Nullable String getPassword() {
-        return user.getPassword();
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return email;
     }
 
     @Override
@@ -53,11 +70,7 @@ public class UserPrincipal implements UserDetails {
         return UserDetails.super.isEnabled();
     }
 
-    public User getUser() {
-        return user;
-    }
-
     public UUID getId(){
-        return user.getId();
+        return id;
     }
 }

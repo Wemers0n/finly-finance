@@ -7,22 +7,19 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 public class SecurityFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
-    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(
@@ -34,13 +31,15 @@ public class SecurityFilter extends OncePerRequestFilter {
         String token = recoverToken(request);
 
         if (token != null){
-            String email = tokenService.validateToken(token);
-            if (email != null){
-                User user = userRepository
-                        .findByEmail(email)
-                        .orElseThrow();
 
-                UserPrincipal principal = new UserPrincipal(user);
+            var decodedJWT = tokenService.validateToken(token);
+
+            if(decodedJWT != null){
+
+                String email = decodedJWT.getSubject();
+                String userId = decodedJWT.getClaim("userId").asString();
+
+                UserPrincipal principal = new UserPrincipal(UUID.fromString(userId), email);
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
@@ -48,11 +47,13 @@ public class SecurityFilter extends OncePerRequestFilter {
                                 null,
                                 principal.getAuthorities()
                         );
+
                 SecurityContextHolder
                         .getContext()
                         .setAuthentication(authentication);
             }
         }
+
         filterChain.doFilter(request, response);
     }
 

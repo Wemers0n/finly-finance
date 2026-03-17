@@ -29,7 +29,7 @@ public class AuthService {
 
         UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
 
-        String token = tokenService.generateToken(principal.getUser());
+        String token = tokenService.generateToken(principal.getId(), principal.getUsername());
 
         return new ResponseOutput(token);
     }
@@ -37,7 +37,7 @@ public class AuthService {
     public ResponseOutput register(UserInput input) {
         User user = createUserService.create(input);
 
-        String token = tokenService.generateToken(user);
+        String token = tokenService.generateToken(user.getId(), user.getEmail());
         return new ResponseOutput(token);
     }
 }
