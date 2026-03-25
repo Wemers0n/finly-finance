@@ -24,9 +24,9 @@ public class CreateUserServiceIntegrationTest extends AbstractIntegrationTest {
 
         var userDTO = new UserInput("Joao", "Sousa", "test01@gmail.com", "12345678");
 
-        UUID id = createUserService.create(userDTO);
+        var user = createUserService.create(userDTO);
 
-        Assertions.assertNotNull(id);
+        Assertions.assertNotNull(user.getId());
         Assertions.assertTrue(userRepository.existsByEmail(userDTO.email()));
     }
 

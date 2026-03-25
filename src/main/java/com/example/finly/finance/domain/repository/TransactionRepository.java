@@ -23,4 +23,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+
+    @Query("""
+            SELECT t
+            FROM Transaction t
+            WHERE t.accountId.id = :accountId
+            ORDER BY t.transactionDate DESC
+            """)
+    List<Transaction> findByAccountId(@Param("accountId") UUID accountId);
 }

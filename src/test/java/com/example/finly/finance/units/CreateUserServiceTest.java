@@ -45,9 +45,9 @@ public class CreateUserServiceTest {
                     return user; // Entidade persistida
                 });
 
-        UUID id = createUserService.create(userDTO);
+        var user = createUserService.create(userDTO);
 
-        Assertions.assertNotNull(id);
+        Assertions.assertNotNull(user.getId());
         Mockito.verify(userRepository, Mockito.times(1)).save(ArgumentMatchers.any(User.class));
 
     }

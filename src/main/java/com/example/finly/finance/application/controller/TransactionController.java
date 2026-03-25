@@ -4,18 +4,22 @@ import com.example.finly.finance.application.dtos.in.BankTransactionInput;
 import com.example.finly.finance.application.dtos.in.CardTransactionInput;
 import com.example.finly.finance.application.dtos.in.DepositInput;
 import com.example.finly.finance.application.dtos.out.MonthlyTransactionSummaryOutput;
+import com.example.finly.finance.application.dtos.out.TransactionOutput;
 import com.example.finly.finance.domain.model.enums.EBalanceOperation;
 import com.example.finly.finance.domain.model.enums.EBankTransactionType;
 import com.example.finly.finance.domain.services.account.CreateBankTransactionService;
 import com.example.finly.finance.domain.services.card.CreateCardTransactionService;
 import com.example.finly.finance.domain.services.transaction.GetMonthlyTransactionSummaryService;
+import com.example.finly.finance.domain.services.transaction.GetTransactionsService;
 import com.example.finly.finance.infraestructure.utils.UriUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -26,6 +30,7 @@ public class TransactionController {
     private final CreateBankTransactionService bankTransactionService;
     private final CreateCardTransactionService cardTransactionService;
     private final GetMonthlyTransactionSummaryService getMonthlyTransactionSummaryService;
+    private final GetTransactionsService getTransactionsService;
 
     @PostMapping("/bank")
     public ResponseEntity<Void> createBankTransaction(@RequestBody BankTransactionInput input){
@@ -67,5 +72,11 @@ public class TransactionController {
     ) {
         MonthlyTransactionSummaryOutput output = getMonthlyTransactionSummaryService.getSummary(accountId, referenceMonth);
         return ResponseEntity.ok(output);
+    }
+
+    @GetMapping("/account/{accountId}")
+    public ResponseEntity<List<TransactionOutput>> listAllByAccount(@PathVariable UUID accountId) {
+        List<TransactionOutput> outputs = getTransactionsService.listByAccount(accountId);
+        return ResponseEntity.ok(outputs);
     }
 }
