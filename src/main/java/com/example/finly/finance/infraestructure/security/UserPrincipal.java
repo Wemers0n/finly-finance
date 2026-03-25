@@ -20,17 +20,31 @@ public class UserPrincipal implements UserDetails {
     private final UUID id;
     private final String email;
     private final String password;
+    private final String firstname;
+    private final String lastname;
 
     public UserPrincipal(User user){
         this.id = user.getId();
         this.email = user.getEmail();
         this.password = user.getPassword();
+        this.firstname = user.getFirstname();
+        this.lastname = user.getLastname();
     }
 
-    public UserPrincipal(UUID id, String email){
+    public UserPrincipal(UUID id, String email, String firstname, String lastname){
         this.id = id;
         this.email = email;
         this.password = null;
+        this.firstname = firstname;
+        this.lastname = lastname;
+    }
+
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public String getLastname() {
+        return lastname;
     }
 
     @Override

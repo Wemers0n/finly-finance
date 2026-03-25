@@ -27,4 +27,9 @@ public class AuthController {
         return authService.register(input);
     }
 
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logout() {
+    }
+
 }

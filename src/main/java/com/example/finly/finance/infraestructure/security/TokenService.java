@@ -9,25 +9,36 @@ import com.example.finly.finance.domain.model.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.security.KeyFactory;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.time.*;
+import java.util.Base64;
 import java.util.UUID;
 
 @Service
 public class TokenService {
 
-    @Value("${api.security.token.secret}")
-    private String secretKey;
+    @Value("${api.security.token.private-key}")
+    private String privateKeyStr;
 
-    public String generateToken(UUID userId, String email){
+    @Value("${api.security.token.public-key}")
+    private String publicKeyStr;
+
+    public String generateToken(UUID userId, String email, String firstname, String lastname){
 
         try {
 
-            Algorithm algorithm = Algorithm.HMAC256(secretKey);
+            Algorithm algorithm = Algorithm.RSA256(getPublicKey(), getPrivateKey());
 
             return JWT.create()
                     .withIssuer("finly-finance")
                     .withSubject(email)
                     .withClaim("userId", userId.toString())
+                    .withClaim("firstname", firstname)
+                    .withClaim("lastname", lastname)
                     .withExpiresAt(generateExpirationDate())
                     .sign(algorithm);
 
@@ -40,7 +51,7 @@ public class TokenService {
 
         try {
 
-            Algorithm algorithm = Algorithm.HMAC256(secretKey);
+            Algorithm algorithm = Algorithm.RSA256(getPublicKey(), getPrivateKey());
 
             return JWT.require(algorithm)
                     .withIssuer("finly-finance")
@@ -49,6 +60,28 @@ public class TokenService {
 
         } catch (JWTVerificationException exception){
             return null;
+        }
+    }
+
+    private RSAPrivateKey getPrivateKey() {
+        try {
+            byte[] keyBytes = Base64.getDecoder().decode(privateKeyStr);
+            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            return (RSAPrivateKey) kf.generatePrivate(spec);
+        } catch (Exception e) {
+            throw new RuntimeException("Error decoding private key", e);
+        }
+    }
+
+    private RSAPublicKey getPublicKey() {
+        try {
+            byte[] keyBytes = Base64.getDecoder().decode(publicKeyStr);
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            return (RSAPublicKey) kf.generatePublic(spec);
+        } catch (Exception e) {
+            throw new RuntimeException("Error decoding public key", e);
         }
     }
 

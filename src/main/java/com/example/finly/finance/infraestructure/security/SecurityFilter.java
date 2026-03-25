@@ -38,8 +38,15 @@ public class SecurityFilter extends OncePerRequestFilter {
 
                 String email = decodedJWT.getSubject();
                 String userId = decodedJWT.getClaim("userId").asString();
+                String firstname = decodedJWT.getClaim("firstname").asString();
+                String lastname = decodedJWT.getClaim("lastname").asString();
 
-                UserPrincipal principal = new UserPrincipal(UUID.fromString(userId), email);
+                UserPrincipal principal = new UserPrincipal(
+                        UUID.fromString(userId), 
+                        email, 
+                        firstname, 
+                        lastname
+                );
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
