@@ -17,10 +17,8 @@ public class CreateBankAccountService {
 
     private final UserRepository userRepository;
 
-    public UUID create(UUID userId, BankAccountInput input){
-
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotExistsException(userId.toString()));
-
+    public UUID create(UUID userId, BankAccountInput input) {
+        User user = userRepository.findById(userId).orElseThrow(UserNotExistsException::new);
         UUID bankId = user.addBankAccount(
                 input.accountName(),
                 input.accountType(),

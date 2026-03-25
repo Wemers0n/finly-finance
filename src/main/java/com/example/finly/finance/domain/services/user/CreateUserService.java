@@ -32,7 +32,6 @@ public class CreateUserService {
                 passwordEncoder.encode(input.password())
         );
 
-        User savedUser = this.userRepository.save(user);
-        return savedUser;
+        return this.userRepository.save(user);
     }
 }

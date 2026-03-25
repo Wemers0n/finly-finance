@@ -66,6 +66,10 @@ public class User {
                         .findFirst());
     }
 
+    public List<BankAccount> findAllAccounts() {
+        return Collections.unmodifiableList(bankAccounts);
+    }
+
     @PrePersist
     private void onCreate() {
         this.createdAt = LocalDateTime.now();

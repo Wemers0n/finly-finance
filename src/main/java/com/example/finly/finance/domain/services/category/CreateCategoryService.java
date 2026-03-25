@@ -23,12 +23,12 @@ public class CreateCategoryService {
 
     public String createCategory(UUID accountId, CategoryInput input){
 
-        var user = validateAccount(accountId);
-        validateCategory(user, input);
+        var account = validateAccount(accountId);
+        validateCategory(account, input);
 
-        user.addCategory(input.name());
+        account.addCategory(input.name());
 
-        this.bankAccountRepository.save(user);
+        this.bankAccountRepository.save(account);
         return input.name();
     }
 
