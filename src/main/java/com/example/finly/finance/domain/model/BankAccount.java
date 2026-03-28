@@ -58,7 +58,8 @@ public class BankAccount {
         this.userId = userId;
         this.accountName = Objects.requireNonNull(accountName);
         this.accountType = Objects.requireNonNull(accountType);
-        this.currentBalance = Objects.requireNonNullElse(initialBalance, BigDecimal.ZERO); // initialBalance != null ? initialBalance : BigDecimal.ZERO;
+        this.currentBalance = Objects.requireNonNullElse(initialBalance, BigDecimal.ZERO);
+        this.categories.add(new Category(this, "Depósitos"));
     }
 
     public void debit(BigDecimal value){
@@ -139,8 +140,8 @@ public class BankAccount {
             throw new BusinessException("Fatura já está totalmente paga");
         }
 
-        this.debit(amountToPay);
-        card.releaseLimit(amountToPay);
+//        this.debit(amountToPay);
+//        card.releaseLimit(amountToPay);
 
         invoice.registerPayment(amountToPay);
         invoice.getTransactions().forEach(Transaction::markAsCompleted);

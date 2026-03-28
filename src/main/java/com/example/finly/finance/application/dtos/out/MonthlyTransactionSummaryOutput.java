@@ -23,7 +23,8 @@ public record MonthlyTransactionSummaryOutput(
             BigDecimal value,
             String category,
             String type,
-            String origin
+            String origin,
+            String operation
     ) {
     }
 }

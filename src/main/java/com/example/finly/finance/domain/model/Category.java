@@ -29,9 +29,6 @@ public class Category {
     @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(precision = 10, scale = 2, nullable = false)
-    private BigDecimal totalSpent = BigDecimal.ZERO; // campo derivado
-
     @OneToMany(mappedBy = "categoryId", cascade = CascadeType.ALL)
     private List<Transaction> transactions = new ArrayList<>();
 
@@ -46,7 +43,6 @@ public class Category {
 
     public UUID addTransaction(Transaction transaction){
         this.transactions.add(transaction);
-        this.addTotalSpentValue(transaction.getValue());
         return transaction.getId();
     }
 
@@ -57,15 +53,6 @@ public class Category {
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
 
         this.transactions.remove(transaction);
-        this.removeTotalSpentValue(transaction.getValue());
-    }
-
-    private void addTotalSpentValue(BigDecimal value){
-        this.totalSpent = this.totalSpent.add(value);
-    }
-
-    private void removeTotalSpentValue(BigDecimal value){
-        this.totalSpent = this.totalSpent.subtract(value);
     }
     public UUID addBudget(Budget budget){
         this.budgets.add(budget);

@@ -59,14 +59,19 @@ public class GetMonthlyTransactionSummaryService {
                     String categoryName = transaction.getCategoryId().getName();
                     String origin = transaction.getOriginType().name();
                     String transactionType;
+                    String operation = "DEBIT"; // Default for card
 
                     // Caso exista um tipo específico de transação bancária, usa ele
                     if (transaction instanceof BankTransaction bankTransaction) {
                         transactionType = bankTransaction.getTransactionType() != null
                                 ? bankTransaction.getTransactionType().name()
                                 : "BANK";
+                        operation = bankTransaction.getOperation() != null 
+                                ? bankTransaction.getOperation().name() 
+                                : "DEBIT";
                     } else if (transaction instanceof CardTransaction) {
                         transactionType = "CREDIT_CARD";
+                        operation = "DEBIT";
                     } else {
                         transactionType = "UNKNOWN";
                     }
@@ -77,7 +82,8 @@ public class GetMonthlyTransactionSummaryService {
                             transaction.getValue(),
                             categoryName,
                             transactionType,
-                            origin
+                            origin,
+                            operation
                     );
                 })
                 .toList();

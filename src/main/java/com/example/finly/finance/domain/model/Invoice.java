@@ -42,9 +42,6 @@ public class Invoice {
     @Column(name = "reference_month", nullable = false)
     private YearMonth referenceMonth;
 
-    @Column(name = "total_amount", precision = 10, scale = 2, nullable = false)
-    private BigDecimal totalAmount = BigDecimal.ZERO;
-
     @Column(name = "amount_paid", precision = 10, scale = 2, nullable = false)
     private BigDecimal amountPaid = BigDecimal.ZERO;
 
@@ -70,7 +67,6 @@ public class Invoice {
 
     public void addTransaction(CardTransaction transaction) {
         this.transactions.add(transaction);
-        this.totalAmount = this.totalAmount.add(transaction.getValue());
     }
 
     public boolean shouldClose(LocalDate today){
@@ -81,8 +77,14 @@ public class Invoice {
         return status == EInvoiceStatus.CLOSED;
     }
 
+    public BigDecimal getTotalAmount() {
+        return transactions.stream()
+                .map(CardTransaction::getValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     public BigDecimal remainingAmount(){
-        return totalAmount.subtract(amountPaid);
+        return getTotalAmount().subtract(amountPaid);
     }
 
     public void registerPayment(BigDecimal paymentAmount) {

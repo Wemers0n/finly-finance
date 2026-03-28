@@ -3,6 +3,7 @@ package com.example.finly.finance.domain.services.card;
 import com.example.finly.finance.application.dtos.in.CardTransactionInput;
 import com.example.finly.finance.domain.model.*;
 import com.example.finly.finance.domain.repository.BankAccountRepository;
+import com.example.finly.finance.domain.repository.TransactionRepository;
 import com.example.finly.finance.domain.services.budget.BudgetLimitValidator;
 import com.example.finly.finance.infraestructure.handler.exception.CategoryNotFoundException;
 import com.example.finly.finance.infraestructure.handler.exception.CreditCardNotFoundException;
@@ -23,6 +24,7 @@ public class CreateCardTransactionService {
 
     private final BankAccountRepository bankAccountRepository;
     private final BudgetLimitValidator budgetLimitValidator;
+    private final TransactionRepository transactionRepository;
 
     public UUID cardTransaction(CardTransactionInput input) {
 
@@ -41,7 +43,8 @@ public class CreateCardTransactionService {
         var projectedTotal = alreadySpent.add(input.value());
         budgetLimitValidator.validate(category, projectedTotal, referenceMonth);
 
-        creditCard.authorize(input.value());
+        BigDecimal currentUsedLimit = transactionRepository.sumUsedLimit(creditCard.getId());
+        creditCard.authorize(input.value(), currentUsedLimit);
 
         // Recurso de cascade do jpa com o transactional
         return createInstallments(creditCard, category, input, LocalDate.now());

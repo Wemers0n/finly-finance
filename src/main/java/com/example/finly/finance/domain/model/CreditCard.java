@@ -43,9 +43,6 @@ public class CreditCard {
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal cardLimit;
 
-    @Column(name = "used_limit", precision = 10, scale = 2, nullable = false)
-    private BigDecimal usedLimit = BigDecimal.ZERO;
-
     @Column(nullable = false)
     private Integer closingDay;
 
@@ -72,15 +69,13 @@ public class CreditCard {
         this.dueDay = Objects.requireNonNull(dueDay);
     }
 
-    public void authorize(BigDecimal value){
+    public void authorize(BigDecimal value, BigDecimal currentUsedLimit){
         validateValue(value);
 
-        BigDecimal available = cardLimit.subtract(usedLimit); 
+        BigDecimal available = cardLimit.subtract(currentUsedLimit); 
         if (available.compareTo(value) < 0){
             throw new BusinessException("Limite do cartão insuficiente");
         }
-
-        this.usedLimit = this.usedLimit.add(value);
     }
 
     public Invoice findOpenInvoice(YearMonth referenceMonth) {
@@ -118,16 +113,6 @@ public class CreditCard {
             return month.plusMonths(1);
         }
         return month;
-    }
-
-    public void releaseLimit(BigDecimal value){
-        validateValue(value);
-
-        this.usedLimit = this.usedLimit.subtract(value);
-
-        if (this.usedLimit.compareTo(BigDecimal.ZERO)< 0){
-            this.usedLimit = BigDecimal.ZERO;
-        }
     }
 
     public Optional<Invoice> findInvoiceById(UUID invoiceId){
