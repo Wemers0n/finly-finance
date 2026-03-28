@@ -4,27 +4,40 @@ import com.example.finly.finance.application.dtos.out.CategorySummaryOutput;
 import com.example.finly.finance.domain.model.BankAccount;
 import com.example.finly.finance.domain.model.User;
 import com.example.finly.finance.domain.repository.BankAccountRepository;
+import com.example.finly.finance.domain.repository.TransactionRepository;
 import com.example.finly.finance.domain.repository.UserRepository;
 import com.example.finly.finance.infraestructure.handler.exception.BankAccountNotFoundException;
 import com.example.finly.finance.infraestructure.handler.exception.UserNotExistsException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class GetCategorySummaryService {
 
     private final BankAccountRepository bankAccountRepository;
+    private final TransactionRepository transactionRepository;
 
-    public GetCategorySummaryService(BankAccountRepository bankAccountRepository) {
-        this.bankAccountRepository = bankAccountRepository;
-    }
+    public CategorySummaryOutput summaryOutput(UUID accountId){
+        var account = findAccount(accountId);
 
-    public CategorySummaryOutput summaryOutput(UUID userId){
-        var user = findAccount(userId);
+        List<CategorySummaryOutput.CategoryItem> items = account.getCategories().stream()
+                .map(category -> new CategorySummaryOutput.CategoryItem(
+                        category.getId(),
+                        category.getName(),
+                        transactionRepository.sumSpentByCategory(category.getId()),
+                        transactionRepository.sumReceivedByCategory(category.getId())
+                ))
+                .toList();
 
-        var summary = CategorySummaryOutput.fromEntity(user);
-        return summary;
+        return new CategorySummaryOutput(
+                account.getUserId().getFirstname(),
+                items.size(),
+                items
+        );
     }
 
     private BankAccount findAccount(UUID accountId){
