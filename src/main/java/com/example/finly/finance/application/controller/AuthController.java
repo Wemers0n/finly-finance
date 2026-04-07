@@ -22,14 +22,23 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    @ResponseStatus(HttpStatus.CREATED) // Indica sucesso 201
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseOutput register(@RequestBody @Valid UserInput input) {
         return authService.register(input);
     }
 
+    @PostMapping("/refresh")
+    public ResponseOutput refresh(@RequestParam String refreshToken) {
+        return authService.refreshToken(refreshToken);
+    }
+
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void logout() {
+    public void logout(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            authService.logout(token);
+        }
     }
 
 }
