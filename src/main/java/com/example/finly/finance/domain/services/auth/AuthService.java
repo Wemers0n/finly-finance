@@ -6,6 +6,7 @@ import com.example.finly.finance.application.dtos.out.ResponseOutput;
 import com.example.finly.finance.domain.model.User;
 import com.example.finly.finance.domain.services.user.CreateUserService;
 import com.example.finly.finance.domain.repository.UserRepository;
+import com.example.finly.finance.infraestructure.handler.exception.UserNotExistsException;
 import com.example.finly.finance.infraestructure.security.TokenService;
 import com.example.finly.finance.infraestructure.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class AuthService {
         var auth = authenticationManager.authenticate(usernamePassword);
 
         UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
-        User user = userRepository.findById(principal.getId()).orElseThrow();
+        User user = userRepository.findById(principal.getId()).orElseThrow(UserNotExistsException::new);
 
         String token = tokenService.generateToken(
                 principal.getId(),
