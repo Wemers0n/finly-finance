@@ -96,7 +96,7 @@ public class CreateCardTransactionService {
             );
 
             invoice.addTransaction(installmentTransaction);
-            category.addTransaction(installmentTransaction);
+            // category.addTransaction(installmentTransaction); // Removido para evitar redundância e erro de atualização
 
             lastTransactionId = installmentTransaction.getId();
         }
