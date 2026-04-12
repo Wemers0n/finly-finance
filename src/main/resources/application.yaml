@@ -22,6 +22,15 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+
+  cache:
+    type: redis
+
 api:
   security:
     token:

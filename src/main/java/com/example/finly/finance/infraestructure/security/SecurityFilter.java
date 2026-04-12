@@ -1,7 +1,5 @@
 package com.example.finly.finance.infraestructure.security;
 
-import com.example.finly.finance.domain.model.User;
-import com.example.finly.finance.domain.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,27 +35,33 @@ public class SecurityFilter extends OncePerRequestFilter {
             if(decodedJWT != null){
 
                 String email = decodedJWT.getSubject();
-                String userId = decodedJWT.getClaim("userId").asString();
-                String firstname = decodedJWT.getClaim("firstname").asString();
-                String lastname = decodedJWT.getClaim("lastname").asString();
+                var userIdClaim = decodedJWT.getClaim("userId");
+                var firstnameClaim = decodedJWT.getClaim("firstname");
+                var lastnameClaim = decodedJWT.getClaim("lastname");
 
-                UserPrincipal principal = new UserPrincipal(
-                        UUID.fromString(userId), 
-                        email, 
-                        firstname, 
-                        lastname
-                );
+                if (!userIdClaim.isMissing() && !userIdClaim.isNull()) {
+                    String userId = userIdClaim.asString();
+                    String firstname = firstnameClaim.asString();
+                    String lastname = lastnameClaim.asString();
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                principal,
-                                null,
-                                principal.getAuthorities()
-                        );
+                    UserPrincipal principal = new UserPrincipal(
+                            UUID.fromString(userId), 
+                            email, 
+                            firstname != null ? firstname : "", 
+                            lastname != null ? lastname : ""
+                    );
 
-                SecurityContextHolder
-                        .getContext()
-                        .setAuthentication(authentication);
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    principal,
+                                    null,
+                                    principal.getAuthorities()
+                            );
+
+                    SecurityContextHolder
+                            .getContext()
+                            .setAuthentication(authentication);
+                }
             }
         }
 

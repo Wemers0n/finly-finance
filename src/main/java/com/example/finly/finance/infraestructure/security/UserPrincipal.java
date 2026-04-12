@@ -1,8 +1,6 @@
 package com.example.finly.finance.infraestructure.security;
 
 import com.example.finly.finance.domain.model.User;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,10 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 
-//@RequiredArgsConstructor
 public class UserPrincipal implements UserDetails {
-
-    // private final User user;
 
     private final UUID id;
     private final String email;

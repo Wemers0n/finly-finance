@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .headers(headers -> headers
                         .xssProtection(xss -> xss.disable())
                         .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; frame-ancestors 'none'; upgrade-insecure-requests"))
+                        // .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self' http://localhost:8080; frame-ancestors 'none'; upgrade-insecure-requests"))
                         .frameOptions(frame -> frame.deny())
                         .httpStrictTransportSecurity(hsts -> hsts
                                 .includeSubDomains(true)
