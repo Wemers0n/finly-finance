@@ -2,7 +2,6 @@ package com.example.finly.finance.domain.services.invoices;
 
 import com.example.finly.finance.application.dtos.out.InvoiceOutput;
 import com.example.finly.finance.application.dtos.out.TransactionOutput;
-import com.example.finly.finance.domain.model.BankTransaction;
 import com.example.finly.finance.domain.model.CardTransaction;
 import com.example.finly.finance.domain.model.CreditCard;
 import com.example.finly.finance.domain.model.Invoice;

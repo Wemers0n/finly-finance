@@ -11,6 +11,8 @@ import com.example.finly.finance.infraestructure.handler.exception.CategoryNotFo
 import com.example.finly.finance.infraestructure.handler.exception.TransactionDeniedException;
 import com.example.finly.finance.domain.services.budget.BudgetLimitValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,11 @@ public class CreateBankTransactionService {
     private final BankAccountRepository bankAccountRepository;
     private final BudgetLimitValidator budgetLimitValidator;
 
+    @Caching(evict = {
+        @CacheEvict(value = "dashboard_summary", allEntries = true),
+        @CacheEvict(value = "category_summary", key = "#input.accountId().toString()"),
+        @CacheEvict(value = "user_accounts", allEntries = true)
+    })
     public UUID bankTransaction(BankTransactionInput input){
 
         var account = findBankAccount(input.accountId());

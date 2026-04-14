@@ -2,13 +2,11 @@ package com.example.finly.finance.domain.services.category;
 
 import com.example.finly.finance.application.dtos.out.CategorySummaryOutput;
 import com.example.finly.finance.domain.model.BankAccount;
-import com.example.finly.finance.domain.model.User;
 import com.example.finly.finance.domain.repository.BankAccountRepository;
 import com.example.finly.finance.domain.repository.TransactionRepository;
-import com.example.finly.finance.domain.repository.UserRepository;
 import com.example.finly.finance.infraestructure.handler.exception.BankAccountNotFoundException;
-import com.example.finly.finance.infraestructure.handler.exception.UserNotExistsException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +19,7 @@ public class GetCategorySummaryService {
     private final BankAccountRepository bankAccountRepository;
     private final TransactionRepository transactionRepository;
 
+    @Cacheable(value = "category_summary", key = "#accountId.toString()")
     public CategorySummaryOutput summaryOutput(UUID accountId){
         var account = findAccount(accountId);
 

@@ -8,6 +8,7 @@ public record BankAccountOutput(
         UUID id,
         String accountName,
         EAccountType accountType,
-        BigDecimal currentBalance
+        BigDecimal currentBalance,
+        BigDecimal monthlyBalance
 ) {
 }

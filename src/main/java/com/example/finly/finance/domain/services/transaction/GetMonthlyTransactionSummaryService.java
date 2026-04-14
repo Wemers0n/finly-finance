@@ -5,11 +5,11 @@ import com.example.finly.finance.domain.model.BankTransaction;
 import com.example.finly.finance.domain.model.CardTransaction;
 import com.example.finly.finance.domain.model.Transaction;
 import com.example.finly.finance.domain.model.enums.EBalanceOperation;
-import com.example.finly.finance.domain.model.enums.EBankTransactionType;
 import com.example.finly.finance.domain.repository.BankAccountRepository;
 import com.example.finly.finance.domain.repository.TransactionRepository;
 import com.example.finly.finance.infraestructure.handler.exception.BankAccountNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +28,7 @@ public class GetMonthlyTransactionSummaryService {
     private final BankAccountRepository bankAccountRepository;
     private final TransactionRepository transactionRepository;
 
+    @Cacheable(value = "dashboard_summary", key = "#accountId.toString() + '_' + #referenceMonth.toString()")
     public MonthlyTransactionSummaryOutput getSummary(UUID accountId, LocalDate referenceMonth) {
         var account = bankAccountRepository.findById(accountId)
                 .orElseThrow(BankAccountNotFoundException::new);

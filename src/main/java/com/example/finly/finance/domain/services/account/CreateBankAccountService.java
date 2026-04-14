@@ -5,6 +5,7 @@ import com.example.finly.finance.infraestructure.handler.exception.UserNotExists
 import com.example.finly.finance.domain.model.User;
 import com.example.finly.finance.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ public class CreateBankAccountService {
 
     private final UserRepository userRepository;
 
+    @CacheEvict(value = "user_accounts", key = "#userId.toString()")
     public UUID create(UUID userId, BankAccountInput input) {
         User user = userRepository.findById(userId).orElseThrow(UserNotExistsException::new);
         UUID bankId = user.addBankAccount(

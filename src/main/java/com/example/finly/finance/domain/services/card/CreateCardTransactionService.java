@@ -8,6 +8,8 @@ import com.example.finly.finance.domain.services.budget.BudgetLimitValidator;
 import com.example.finly.finance.infraestructure.handler.exception.CategoryNotFoundException;
 import com.example.finly.finance.infraestructure.handler.exception.CreditCardNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,10 @@ public class CreateCardTransactionService {
     private final BudgetLimitValidator budgetLimitValidator;
     private final TransactionRepository transactionRepository;
 
+    @Caching(evict = {
+        @CacheEvict(value = "dashboard_summary", allEntries = true),
+        @CacheEvict(value = "category_summary", allEntries = true)
+    })
     public UUID cardTransaction(CardTransactionInput input) {
 
         BankAccount account = bankAccountRepository
