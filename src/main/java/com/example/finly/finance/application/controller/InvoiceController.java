@@ -26,6 +26,11 @@ public class InvoiceController {
         return ResponseEntity.ok(getInvoicesService.listByCard(cardId));
     }
 
+    @GetMapping("/account/{accountId}/open")
+    public ResponseEntity<List<InvoiceOutput>> listOpenInvoicesByAccount(@PathVariable UUID accountId) {
+        return ResponseEntity.ok(getInvoicesService.listOpenInvoicesByAccount(accountId));
+    }
+
     @GetMapping("/{invoiceId}")
     public ResponseEntity<InvoiceOutput> getById(@PathVariable UUID invoiceId) {
         return ResponseEntity.ok(getInvoicesService.getById(invoiceId));
