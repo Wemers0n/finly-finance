@@ -28,7 +28,7 @@ public class GetUserBankAccountsService {
     private final TransactionRepository transactionRepository;
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "user_accounts_v2", key = "#userId.toString()")
+    @Cacheable(value = "user_accounts", key = "#userId.toString()")
     public List<BankAccountOutput> listAccounts(UUID userId) {
         var user = userRepository.findByIdWithBankAccounts(userId)
                 .orElseThrow(UserNotExistsException::new);
@@ -46,12 +46,14 @@ public class GetUserBankAccountsService {
                             endDate
                     );
 
+                   // BigDecimal currentBalance = transactionRepository.sumCurrentBalance(account.getId());
                     BigDecimal monthlyBalance = calculateMonthlyBalance(transactions);
 
                     return new BankAccountOutput(
                             account.getId(),
                             account.getAccountName(),
                             account.getAccountType(),
+                           // currentBalance,
                             account.getCurrentBalance(),
                             monthlyBalance
                     );
