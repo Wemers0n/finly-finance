@@ -49,6 +49,19 @@ public class Budget {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    public void update(BigDecimal amountLimit, Integer alertPercentage, Boolean active) {
+        if (amountLimit != null && amountLimit.compareTo(BigDecimal.ZERO) > 0) {
+            this.amountLimit = amountLimit;
+        }
+        if (alertPercentage != null && alertPercentage > 0 && alertPercentage <= 100) {
+            this.alertPercentage = alertPercentage;
+        }
+        if (active != null) {
+            this.active = active;
+        }
+        this.updatedAt = LocalDateTime.now();
+    }
+
     public Budget(BankAccount bankAccountId, Category categoryId, BigDecimal amountLimit, LocalDate referenceMonth, Integer alertPercentage, Boolean active){
         this.id = UUID.randomUUID();
         this.bankAccountId = Objects.requireNonNull(bankAccountId);

@@ -44,6 +44,19 @@ public class GetBudgetMonitoringService {
         );
     }
 
+    public BudgetMonitoringOutput.BudgetItem getMonitoringByCategory(UUID accountId, String categoryName, LocalDate referenceMonth) {
+        BankAccount account = findAccount(accountId);
+        YearMonth yearMonth = YearMonth.from(referenceMonth);
+
+        return account.getBudgets().stream()
+                .filter(Budget::getActive)
+                .filter(budget -> YearMonth.from(budget.getReferenceMonth()).equals(yearMonth))
+                .filter(budget -> budget.getCategoryId().getName().equalsIgnoreCase(categoryName))
+                .map(budget -> toBudgetItem(budget, yearMonth))
+                .findFirst()
+                .orElse(null);
+    }
+
     private BankAccount findAccount(UUID accountId) {
         return bankAccountRepository.findById(accountId)
                 .orElseThrow(BankAccountNotFoundException::new);

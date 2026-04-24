@@ -4,15 +4,11 @@ import com.example.finly.finance.application.dtos.in.BudgetInput;
 import com.example.finly.finance.application.dtos.out.BudgetMonitoringOutput;
 import com.example.finly.finance.domain.services.budget.CreateBudgetService;
 import com.example.finly.finance.domain.services.budget.GetBudgetMonitoringService;
+import com.example.finly.finance.domain.services.budget.UpdateBudgetService;
 import com.example.finly.finance.infraestructure.utils.UriUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -25,6 +21,7 @@ public class BudgetController {
 
     private final CreateBudgetService createBudgetService;
     private final GetBudgetMonitoringService getBudgetMonitoringService;
+    private final UpdateBudgetService updateBudgetService;
 
     @PostMapping
     public ResponseEntity<Void> create(@RequestBody BudgetInput input) {
@@ -35,6 +32,12 @@ public class BudgetController {
         return ResponseEntity.created(locationBudgetUri).build();
     }
 
+    @PutMapping("/{budgetId}")
+    public ResponseEntity<Void> update(@PathVariable UUID budgetId, @RequestBody BudgetInput input) {
+        updateBudgetService.updateBudget(budgetId, input);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/monitoring")
     public ResponseEntity<BudgetMonitoringOutput> monitoring(
             @RequestParam UUID accountId,
@@ -42,6 +45,16 @@ public class BudgetController {
     ) {
         BudgetMonitoringOutput output = getBudgetMonitoringService.getMonitoring(accountId, referenceMonth);
         return ResponseEntity.ok(output);
+    }
+
+    @GetMapping("/monitoring/category")
+    public ResponseEntity<BudgetMonitoringOutput.BudgetItem> monitoringByCategory(
+            @RequestParam UUID accountId,
+            @RequestParam String categoryName,
+            @RequestParam LocalDate referenceMonth
+    ) {
+        BudgetMonitoringOutput.BudgetItem output = getBudgetMonitoringService.getMonitoringByCategory(accountId, categoryName, referenceMonth);
+        return output != null ? ResponseEntity.ok(output) : ResponseEntity.notFound().build();
     }
 }
 
