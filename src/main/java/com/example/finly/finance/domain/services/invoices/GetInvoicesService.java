@@ -50,6 +50,18 @@ public class GetInvoicesService {
                 .toList();
     }
 
+    public List<InvoiceOutput> listInvoicesByAccountAndStatus(UUID accountId, EInvoiceStatus status) {
+        var account = bankAccountRepository.findById(accountId)
+                .orElseThrow(BankAccountNotFoundException::new);
+
+        List<CreditCard> cards = account.getCreditCards();
+
+        return invoiceRepository.findByCreditCardIdInAndStatus(cards, status)
+                .stream()
+                .map(this::toOutput)
+                .toList();
+    }
+
     public InvoiceOutput getById(UUID invoiceId) {
         Invoice invoice = invoiceRepository.findById(invoiceId)
                 .orElseThrow(() -> new InvoiceNotFoundException("Fatura não encontrada"));
