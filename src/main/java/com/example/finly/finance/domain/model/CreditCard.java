@@ -65,8 +65,15 @@ public class CreditCard {
         this.cardName = Objects.requireNonNull(cardName);
         this.brand = Objects.requireNonNull(brand);
         this.cardLimit = Objects.requireNonNull(cardLimit);
-        this.closingDay = Objects.requireNonNull(closingDay);
-        this.dueDay = Objects.requireNonNull(dueDay);
+        this.closingDay = validateDay(closingDay, "fechamento");
+        this.dueDay = validateDay(dueDay, "vencimento");
+    }
+
+    private Integer validateDay(Integer day, String fieldName) {
+        if (day == null || day < 1 || day > 31) {
+            throw new BusinessException("Dia de " + fieldName + " deve estar entre 1 e 31");
+        }
+        return day;
     }
 
     public void authorize(BigDecimal value, BigDecimal currentUsedLimit){
@@ -106,7 +113,7 @@ public class CreditCard {
 
     public YearMonth invoiceMonth(LocalDate purchaseDate){
         YearMonth month = YearMonth.from(purchaseDate);
-        LocalDate closingDate = month.atDay(closingDay);
+        LocalDate closingDate = month.atDay(Math.min(closingDay, month.lengthOfMonth()));
 
         // Se a compra ocorreu após o fechamento, ela pertence à fatura do mês seguinte
         if (purchaseDate.isAfter(closingDate)){
@@ -129,11 +136,21 @@ public class CreditCard {
     }
 
     private LocalDate calculateClosingDate(YearMonth referenceMonth) {
-        return referenceMonth.atDay(closingDay);
+        return referenceMonth.atDay(Math.min(closingDay, referenceMonth.lengthOfMonth()));
     }
 
     private LocalDate calculateDueDate(YearMonth referenceMonth) {
-        return referenceMonth.plusMonths(1).atDay(dueDay);
+        LocalDate closingDate = calculateClosingDate(referenceMonth);
+        // coloca o vencimento no mesmo mês de referência
+        LocalDate dueDate = referenceMonth.atDay(Math.min(dueDay, referenceMonth.lengthOfMonth()));
+
+        // Se o vencimento for antes ou no mesmo dia do fechamento, ele deve ser no mês seguinte
+        if (!dueDate.isAfter(closingDate)) {
+            YearMonth nextMonth = referenceMonth.plusMonths(1);
+            dueDate = nextMonth.atDay(Math.min(dueDay, nextMonth.lengthOfMonth()));
+        }
+
+        return dueDate;
     }
 
     @PrePersist
