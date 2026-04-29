@@ -1,11 +1,13 @@
 package com.example.finly.finance.domain.services.auth;
 
+import com.example.finly.finance.application.dtos.in.ForgotPasswordInput;
 import com.example.finly.finance.application.dtos.in.LoginInput;
 import com.example.finly.finance.application.dtos.in.UserInput;
 import com.example.finly.finance.application.dtos.out.ResponseOutput;
 import com.example.finly.finance.domain.model.User;
 import com.example.finly.finance.domain.services.user.CreateUserService;
 import com.example.finly.finance.domain.repository.UserRepository;
+import com.example.finly.finance.infraestructure.handler.exception.BusinessException;
 import com.example.finly.finance.infraestructure.handler.exception.UserNotExistsException;
 import com.example.finly.finance.infraestructure.security.TokenService;
 import com.example.finly.finance.infraestructure.security.UserPrincipal;
@@ -13,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +30,7 @@ public class AuthService {
     private final TokenService tokenService;
     private final CreateUserService createUserService;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public ResponseOutput login(LoginInput input) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(input.email(), input.password());
@@ -94,6 +98,18 @@ public class AuthService {
             User user = userRepository.findById(principal.getId()).orElseThrow();
             tokenService.revokeRefreshTokens(user);
         }
+    }
+
+    public void forgotPassword(ForgotPasswordInput input) {
+        if (!input.newPassword().equals(input.confirmPassword())) {
+            throw new BusinessException("As senhas não coincidem");
+        }
+
+        User user = userRepository.findByEmail(input.email())
+                .orElseThrow(() -> new UserNotExistsException());
+
+        user.changePassword(passwordEncoder.encode(input.newPassword()));
+        userRepository.save(user);
     }
 }
 

@@ -70,6 +70,11 @@ public class User {
         return Collections.unmodifiableList(bankAccounts);
     }
 
+    public void changePassword(String newPassword) {
+        this.password = Objects.requireNonNull(newPassword);
+        this.updatedAt = LocalDateTime.now();
+    }
+
     @PrePersist
     private void onCreate() {
         this.createdAt = LocalDateTime.now();

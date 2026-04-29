@@ -1,5 +1,6 @@
 package com.example.finly.finance.application.controller;
 
+import com.example.finly.finance.application.dtos.in.ForgotPasswordInput;
 import com.example.finly.finance.application.dtos.in.LoginInput;
 import com.example.finly.finance.application.dtos.in.UserInput;
 import com.example.finly.finance.application.dtos.out.ResponseOutput;
@@ -30,6 +31,12 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseOutput refresh(@RequestParam String refreshToken) {
         return authService.refreshToken(refreshToken);
+    }
+
+    @PostMapping("/forgot-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void forgotPassword(@RequestBody @Valid ForgotPasswordInput input) {
+        authService.forgotPassword(input);
     }
 
     @PostMapping("/logout")
