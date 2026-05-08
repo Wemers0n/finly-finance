@@ -1,17 +1,17 @@
 package com.example.finly.finance.application.controller;
 
-import com.example.finly.finance.application.dtos.in.BudgetInput;
+import com.example.finly.finance.application.dtos.in.*;
 import com.example.finly.finance.application.dtos.out.BudgetMonitoringOutput;
 import com.example.finly.finance.domain.services.budget.CreateBudgetService;
 import com.example.finly.finance.domain.services.budget.GetBudgetMonitoringService;
 import com.example.finly.finance.domain.services.budget.UpdateBudgetService;
 import com.example.finly.finance.infraestructure.utils.UriUtils;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
@@ -39,21 +39,14 @@ public class BudgetController {
     }
 
     @GetMapping("/monitoring")
-    public ResponseEntity<BudgetMonitoringOutput> monitoring(
-            @RequestParam UUID accountId,
-            @RequestParam LocalDate referenceMonth
-    ) {
-        BudgetMonitoringOutput output = getBudgetMonitoringService.getMonitoring(accountId, referenceMonth);
+    public ResponseEntity<BudgetMonitoringOutput> monitoring(@Valid BudgetMonitoringInput input) {
+        BudgetMonitoringOutput output = getBudgetMonitoringService.getMonitoring(input.accountId(), input.referenceMonth());
         return ResponseEntity.ok(output);
     }
 
     @GetMapping("/monitoring/category")
-    public ResponseEntity<BudgetMonitoringOutput.BudgetItem> monitoringByCategory(
-            @RequestParam UUID accountId,
-            @RequestParam String categoryName,
-            @RequestParam LocalDate referenceMonth
-    ) {
-        BudgetMonitoringOutput.BudgetItem output = getBudgetMonitoringService.getMonitoringByCategory(accountId, categoryName, referenceMonth);
+    public ResponseEntity<BudgetMonitoringOutput.BudgetItem> monitoringByCategory(@Valid BudgetMonitoringCategoryInput input) {
+        BudgetMonitoringOutput.BudgetItem output = getBudgetMonitoringService.getMonitoringByCategory(input.accountId(), input.categoryName(), input.referenceMonth());
         return output != null ? ResponseEntity.ok(output) : ResponseEntity.notFound().build();
     }
 }
