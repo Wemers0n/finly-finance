@@ -1,13 +1,12 @@
 package com.example.finly.finance.application.controller;
 
-import com.example.finly.finance.application.dtos.in.ForgotPasswordInput;
-import com.example.finly.finance.application.dtos.in.LoginInput;
-import com.example.finly.finance.application.dtos.in.UserInput;
-import com.example.finly.finance.application.dtos.out.ResponseOutput;
-import com.example.finly.finance.domain.services.auth.AuthService;
+import com.example.finly.finance.application.dtos.in.*;
+import com.example.finly.finance.application.dtos.out.AuthenticationResponse;
+import com.example.finly.finance.domain.services.auth.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,28 +14,40 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+    private final LoginService loginService;
+    private final RegisterService registerService;
+    private final AuthRefreshTokenService refreshTokenService;
+    private final LogoutService logoutService;
+    private final ForgotPasswordService forgotPasswordService;
 
     @PostMapping("/login")
-    public ResponseOutput login(@RequestBody LoginInput input){
-        return authService.login(input);
+    public AuthenticationResponse login(@RequestBody LoginInput input){
+        return loginService.login(input);
     }
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseOutput register(@RequestBody @Valid UserInput input) {
-        return authService.register(input);
+    public AuthenticationResponse register(@RequestBody @Valid UserInput input) {
+        return registerService.register(input);
     }
 
     @PostMapping("/refresh")
-    public ResponseOutput refresh(@RequestParam String refreshToken) {
-        return authService.refreshToken(refreshToken);
+    public AuthenticationResponse refresh(@RequestBody @Valid RefreshInput input) {
+        return refreshTokenService.refresh(input.refreshToken());
+    }
+
+    @PostMapping("/forgot-password/verify-email")
+    public ResponseEntity<Void> verifyEmail(@RequestBody @Valid VerifyEmailInput input) {
+        if (forgotPasswordService.existsByEmail(input.email())) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
     }
 
     @PostMapping("/forgot-password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void forgotPassword(@RequestBody @Valid ForgotPasswordInput input) {
-        authService.forgotPassword(input);
+        forgotPasswordService.forgotPassword(input);
     }
 
     @PostMapping("/logout")
@@ -44,8 +55,7 @@ public class AuthController {
     public void logout(@RequestHeader("Authorization") String authHeader) {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            authService.logout(token);
+            logoutService.logout(token);
         }
     }
-
 }

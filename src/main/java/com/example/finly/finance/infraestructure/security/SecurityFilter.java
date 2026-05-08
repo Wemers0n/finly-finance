@@ -17,7 +17,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SecurityFilter extends OncePerRequestFilter {
 
-    private final TokenService tokenService;
+    private final JwtService jwtService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(
@@ -28,9 +29,9 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         String token = recoverToken(request);
 
-        if (token != null){
+        if (token != null && !tokenBlacklistService.isBlacklisted(token)) {
 
-            var decodedJWT = tokenService.validateToken(token);
+            var decodedJWT = jwtService.validateToken(token);
 
             if(decodedJWT != null){
 

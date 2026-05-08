@@ -30,9 +30,19 @@ public class GlobalHandlerException extends ResponseEntityExceptionHandler{
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        log.error("Error code: {}", e.getMessage());
+        log.error("Error code exception: {}", e.getMessage());
 
         return handleExceptionInternal(e, response, headers, status, request);
+    }
 
+    @ExceptionHandler(Exception.class)
+    protected ResponseEntity<Object> handleGeneralException(Exception e) {
+        log.error("Unexpected error occurred", e);
+        
+        ErrorResponse response = new ErrorResponse();
+        response.setError("An unexpected error occurred: " + e.getMessage());
+        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
