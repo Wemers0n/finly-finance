@@ -26,16 +26,11 @@ public class InvoiceController {
         return ResponseEntity.ok(getInvoicesService.listByCard(cardId));
     }
 
-    @GetMapping("/account/{accountId}/open")
-    public ResponseEntity<List<InvoiceOutput>> listOpenInvoicesByAccount(@PathVariable UUID accountId) {
-        return ResponseEntity.ok(getInvoicesService.listOpenInvoicesByAccount(accountId));
-    }
-
     @GetMapping("/account/{accountId}/status/{status}")
-    public ResponseEntity<List<InvoiceOutput>> listInvoicesByAccountAndStatus(
+    public ResponseEntity<List<InvoiceOutput>> listByAccountAndStatus(
             @PathVariable UUID accountId,
             @PathVariable com.example.finly.finance.domain.model.enums.EInvoiceStatus status) {
-        return ResponseEntity.ok(getInvoicesService.listInvoicesByAccountAndStatus(accountId, status));
+        return ResponseEntity.ok(getInvoicesService.listByAccountAndStatus(accountId, status));
     }
 
     @GetMapping("/{invoiceId}")

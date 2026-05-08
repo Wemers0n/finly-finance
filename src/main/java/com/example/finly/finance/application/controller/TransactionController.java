@@ -1,8 +1,6 @@
 package com.example.finly.finance.application.controller;
 
-import com.example.finly.finance.application.dtos.in.BankTransactionInput;
-import com.example.finly.finance.application.dtos.in.CardTransactionInput;
-import com.example.finly.finance.application.dtos.in.DepositInput;
+import com.example.finly.finance.application.dtos.in.*;
 import com.example.finly.finance.application.dtos.out.MonthlyTransactionSummaryOutput;
 import com.example.finly.finance.application.dtos.out.TransactionOutput;
 import com.example.finly.finance.domain.model.enums.EBalanceOperation;
@@ -12,13 +10,12 @@ import com.example.finly.finance.domain.services.card.CreateCardTransactionServi
 import com.example.finly.finance.domain.services.transaction.GetMonthlyTransactionSummaryService;
 import com.example.finly.finance.domain.services.transaction.GetTransactionsService;
 import com.example.finly.finance.infraestructure.utils.UriUtils;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -66,11 +63,8 @@ public class TransactionController {
     }
 
     @GetMapping("/summary/monthly")
-    public ResponseEntity<MonthlyTransactionSummaryOutput> getMonthlySummary(
-            @RequestParam UUID accountId,
-            @RequestParam LocalDate referenceMonth
-    ) {
-        MonthlyTransactionSummaryOutput output = getMonthlyTransactionSummaryService.getSummary(accountId, referenceMonth);
+    public ResponseEntity<MonthlyTransactionSummaryOutput> getMonthlySummary(@Valid MonthlySummaryInput input) {
+        MonthlyTransactionSummaryOutput output = getMonthlyTransactionSummaryService.getSummary(input.accountId(), input.referenceMonth());
         return ResponseEntity.ok(output);
     }
 

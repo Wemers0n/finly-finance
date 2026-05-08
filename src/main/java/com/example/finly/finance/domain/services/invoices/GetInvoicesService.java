@@ -38,23 +38,15 @@ public class GetInvoicesService {
                 .toList();
     }
 
-    public List<InvoiceOutput> listOpenInvoicesByAccount(UUID accountId) {
-        var account = bankAccountRepository.findById(accountId)
-                .orElseThrow(BankAccountNotFoundException::new);
-        
-        List<CreditCard> cards = account.getCreditCards();
-        
-        return invoiceRepository.findByCreditCardIdInAndStatus(cards, EInvoiceStatus.OPEN)
-                .stream()
-                .map(this::toOutput)
-                .toList();
-    }
-
-    public List<InvoiceOutput> listInvoicesByAccountAndStatus(UUID accountId, EInvoiceStatus status) {
+    public List<InvoiceOutput> listByAccountAndStatus(UUID accountId, EInvoiceStatus status) {
         var account = bankAccountRepository.findById(accountId)
                 .orElseThrow(BankAccountNotFoundException::new);
 
         List<CreditCard> cards = account.getCreditCards();
+
+        if (cards.isEmpty()) {
+            return List.of();
+        }
 
         return invoiceRepository.findByCreditCardIdInAndStatus(cards, status)
                 .stream()
