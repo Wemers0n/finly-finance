@@ -1,6 +1,7 @@
 package com.example.finly.finance.domain.services.transaction;
 
 import com.example.finly.finance.application.dtos.out.MonthlyTransactionSummaryOutput;
+import com.example.finly.finance.application.mapper.TransactionMapper;
 import com.example.finly.finance.domain.model.BankTransaction;
 import com.example.finly.finance.domain.model.CardTransaction;
 import com.example.finly.finance.domain.model.Transaction;
@@ -27,6 +28,7 @@ public class GetMonthlyTransactionSummaryService {
 
     private final BankAccountRepository bankAccountRepository;
     private final TransactionRepository transactionRepository;
+    private final TransactionMapper transactionMapper;
 
     @Cacheable(value = "dashboard_summary", key = "#accountId.toString() + '_' + #referenceMonth.toString()")
     public MonthlyTransactionSummaryOutput getSummary(UUID accountId, LocalDate referenceMonth) {
@@ -55,39 +57,7 @@ public class GetMonthlyTransactionSummaryService {
         BigDecimal monthlyBalance = bankCredits.subtract(totalDebits);
 
         // Converte a lista de transações em itens de saída para o resumo mensal
-        var transactionItems = transactions.stream()
-                .map(transaction -> {
-                    String categoryName = transaction.getCategoryId().getName();
-                    String origin = transaction.getOriginType().name();
-                    String transactionType;
-                    String operation = "DEBIT"; // Default for card
-
-                    // Caso exista um tipo específico de transação bancária, usa ele
-                    if (transaction instanceof BankTransaction bankTransaction) {
-                        transactionType = bankTransaction.getTransactionType() != null
-                                ? bankTransaction.getTransactionType().name()
-                                : "BANK";
-                        operation = bankTransaction.getOperation() != null 
-                                ? bankTransaction.getOperation().name() 
-                                : "DEBIT";
-                    } else if (transaction instanceof CardTransaction) {
-                        transactionType = "CREDIT_CARD";
-                        operation = "DEBIT";
-                    } else {
-                        transactionType = "UNKNOWN";
-                    }
-
-                    return new MonthlyTransactionSummaryOutput.TransactionItem(
-                            transaction.getId(),
-                            transaction.getTransactionDate(),
-                            transaction.getValue(),
-                            categoryName,
-                            transactionType,
-                            origin,
-                            operation
-                    );
-                })
-                .toList();
+        var transactionItems = transactionMapper.toSummaryItemList(transactions);
 
         return new MonthlyTransactionSummaryOutput(
                 account.getId(),

@@ -1,6 +1,7 @@
 package com.example.finly.finance.domain.services.account;
 
 import com.example.finly.finance.application.dtos.out.BankAccountOutput;
+import com.example.finly.finance.application.mapper.BankAccountMapper;
 import com.example.finly.finance.domain.model.BankTransaction;
 import com.example.finly.finance.domain.model.CardTransaction;
 import com.example.finly.finance.domain.model.Transaction;
@@ -11,7 +12,6 @@ import com.example.finly.finance.infraestructure.handler.exception.UserNotExists
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -26,6 +26,7 @@ public class GetUserBankAccountsService {
 
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
+    private final BankAccountMapper bankAccountMapper;
 
     @Transactional(readOnly = true)
     @Cacheable(value = "user_accounts", key = "#userId.toString()")
@@ -46,17 +47,8 @@ public class GetUserBankAccountsService {
                             endDate
                     );
 
-                   // BigDecimal currentBalance = transactionRepository.sumCurrentBalance(account.getId());
                     BigDecimal monthlyBalance = calculateMonthlyBalance(transactions);
-
-                    return new BankAccountOutput(
-                            account.getId(),
-                            account.getAccountName(),
-                            account.getAccountType(),
-                           // currentBalance,
-                            account.getCurrentBalance(),
-                            monthlyBalance
-                    );
+                    return bankAccountMapper.toDto(account, monthlyBalance);
                 })
                 .toList();
     }

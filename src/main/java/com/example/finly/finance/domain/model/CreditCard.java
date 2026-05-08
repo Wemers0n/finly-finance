@@ -129,6 +129,14 @@ public class CreditCard {
                         .findFirst());
     }
 
+    public BigDecimal calculateUsedLimit() {
+        if (this.invoices == null) return BigDecimal.ZERO;
+        return this.invoices.stream()
+                .filter(i -> i.getStatus() != EInvoiceStatus.PAID)
+                .map(Invoice::remainingAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     private void validateValue(BigDecimal value){
         if (value == null || value.compareTo(BigDecimal.ZERO) <= 0){
             throw new BusinessException("Valor da transação deve ser maior que zero");

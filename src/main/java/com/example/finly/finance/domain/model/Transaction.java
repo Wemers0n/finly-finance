@@ -70,4 +70,9 @@ public abstract class Transaction {
     public void markAsExpired(){
         this.transactionStatus = ETransactionStatus.EXPIRED;
     }
+
+    public void setAccountAndCategory(BankAccount account, Category category) {
+        this.accountId = Objects.requireNonNull(account);
+        this.categoryId = Objects.requireNonNull(category);
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.finly.finance.domain.services.account;
 
 import com.example.finly.finance.application.dtos.in.BankTransactionInput;
+import com.example.finly.finance.application.mapper.TransactionMapper;
 import com.example.finly.finance.domain.model.BankTransaction;
 import com.example.finly.finance.domain.model.enums.EBalanceOperation;
 import com.example.finly.finance.domain.model.BankAccount;
@@ -25,6 +26,7 @@ public class CreateBankTransactionService {
 
     private final BankAccountRepository bankAccountRepository;
     private final BudgetLimitValidator budgetLimitValidator;
+    private final TransactionMapper transactionMapper;
 
     @Caching(evict = {
         @CacheEvict(value = "dashboard_summary", allEntries = true),
@@ -36,14 +38,8 @@ public class CreateBankTransactionService {
         var account = findBankAccount(input.accountId());
         var category = findCategory(account, input.categoryName());
 
-        BankTransaction transaction = new BankTransaction(
-                account,
-                category,
-                input.value(),
-                input.description(),
-                input.operation(),
-                input.transactionType()
-        );
+        BankTransaction transaction = transactionMapper.toEntity(input);
+        transaction.setAccountAndCategory(account, category);
 
         if (input.operation() == EBalanceOperation.DEBIT) {
             var referenceMonth = java.time.YearMonth.from(transaction.getTransactionDate().toLocalDate());
@@ -55,7 +51,7 @@ public class CreateBankTransactionService {
         transaction.markAsCompleted();
         category.addTransaction(transaction);
         applyTransaction(account, transaction);
-//        this.transactionRepository.save(transaction);
+        
         return transaction.getId();
     }
 

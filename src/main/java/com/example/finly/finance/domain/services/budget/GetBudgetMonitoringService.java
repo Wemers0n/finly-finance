@@ -1,6 +1,7 @@
 package com.example.finly.finance.domain.services.budget;
 
 import com.example.finly.finance.application.dtos.out.BudgetMonitoringOutput;
+import com.example.finly.finance.application.mapper.BudgetMapper;
 import com.example.finly.finance.domain.model.BankAccount;
 import com.example.finly.finance.domain.model.Budget;
 import com.example.finly.finance.domain.repository.BankAccountRepository;
@@ -23,6 +24,7 @@ public class GetBudgetMonitoringService {
 
     private final BankAccountRepository bankAccountRepository;
     private final BudgetLimitValidator budgetLimitValidator;
+    private final BudgetMapper budgetMapper;
 
     public BudgetMonitoringOutput getMonitoring(UUID accountId, LocalDate referenceMonth) {
         BankAccount account = findAccount(accountId);
@@ -79,15 +81,17 @@ public class GetBudgetMonitoringService {
         boolean alertTriggered = usagePercentage.compareTo(BigDecimal.valueOf(budget.getAlertPercentage())) >= 0;
         boolean exceeded = currentSpent.compareTo(plannedAmount) > 0;
 
+        var item = budgetMapper.toBudgetItem(budget);
+        
         return new BudgetMonitoringOutput.BudgetItem(
-                budget.getId(),
-                budget.getCategoryId().getId(),
-                budget.getCategoryId().getName(),
-                plannedAmount,
+                item.budgetId(),
+                item.categoryId(),
+                item.categoryName(),
+                item.plannedAmount(),
                 currentSpent,
                 remainingAmount,
                 usagePercentage,
-                budget.getAlertPercentage(),
+                item.alertPercentage(),
                 alertTriggered,
                 exceeded
         );

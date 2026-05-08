@@ -1,8 +1,7 @@
 package com.example.finly.finance.domain.services.invoices;
 
 import com.example.finly.finance.application.dtos.out.InvoiceOutput;
-import com.example.finly.finance.application.dtos.out.TransactionOutput;
-import com.example.finly.finance.domain.model.CardTransaction;
+import com.example.finly.finance.application.mapper.InvoiceMapper;
 import com.example.finly.finance.domain.model.CreditCard;
 import com.example.finly.finance.domain.model.Invoice;
 import com.example.finly.finance.domain.model.enums.EInvoiceStatus;
@@ -27,15 +26,14 @@ public class GetInvoicesService {
     private final InvoiceRepository invoiceRepository;
     private final CreditCardRepository creditCardRepository;
     private final BankAccountRepository bankAccountRepository;
+    private final InvoiceMapper invoiceMapper;
 
     public List<InvoiceOutput> listByCard(UUID cardId) {
         CreditCard card = creditCardRepository.findById(cardId)
                 .orElseThrow(() -> new BusinessException("Cartão não encontrado"));
         
-        return invoiceRepository.findByCreditCardIdOrderByReferenceMonthDesc(card)
-                .stream()
-                .map(this::toOutput)
-                .toList();
+        List<Invoice> invoices = invoiceRepository.findByCreditCardIdOrderByReferenceMonthDesc(card);
+        return invoiceMapper.toDtoList(invoices);
     }
 
     public List<InvoiceOutput> listByAccountAndStatus(UUID accountId, EInvoiceStatus status) {
@@ -48,48 +46,14 @@ public class GetInvoicesService {
             return List.of();
         }
 
-        return invoiceRepository.findByCreditCardIdInAndStatus(cards, status)
-                .stream()
-                .map(this::toOutput)
-                .toList();
+        List<Invoice> invoices = invoiceRepository.findByCreditCardIdInAndStatus(cards, status);
+        return invoiceMapper.toDtoList(invoices);
     }
 
     public InvoiceOutput getById(UUID invoiceId) {
         Invoice invoice = invoiceRepository.findById(invoiceId)
                 .orElseThrow(() -> new InvoiceNotFoundException("Fatura não encontrada"));
         
-        return toOutput(invoice);
-    }
-
-    private InvoiceOutput toOutput(Invoice invoice) {
-        List<TransactionOutput> transactions = invoice.getTransactions().stream()
-                .map(this::transactionToOutput)
-                .toList();
-
-        return new InvoiceOutput(
-                invoice.getId(),
-                invoice.getCreditCardId().getId(),
-                invoice.getDueDate(),
-                invoice.getClosingDate(),
-                invoice.getReferenceMonth(),
-                invoice.getTotalAmount(),
-                invoice.getAmountPaid(),
-                invoice.remainingAmount(),
-                invoice.getStatus(),
-                transactions
-        );
-    }
-
-    private TransactionOutput transactionToOutput(CardTransaction transaction) {
-        return new TransactionOutput(
-                transaction.getId(),
-                transaction.getTransactionDate(),
-                transaction.getValue(),
-                transaction.getDescription(),
-                transaction.getCategoryId().getName(),
-                "CREDIT_CARD",
-                transaction.getOriginType().name(),
-                "DEBIT"
-        );
+        return invoiceMapper.toDto(invoice);
     }
 }
