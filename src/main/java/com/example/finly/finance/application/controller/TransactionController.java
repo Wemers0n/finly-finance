@@ -1,12 +1,14 @@
 package com.example.finly.finance.application.controller;
 
 import com.example.finly.finance.application.dtos.in.*;
+import com.example.finly.finance.application.dtos.out.AnnualRetrospectiveOutput;
 import com.example.finly.finance.application.dtos.out.MonthlyTransactionSummaryOutput;
 import com.example.finly.finance.application.dtos.out.TransactionOutput;
 import com.example.finly.finance.domain.model.enums.EBalanceOperation;
 import com.example.finly.finance.domain.model.enums.EBankTransactionType;
 import com.example.finly.finance.domain.services.account.CreateBankTransactionService;
 import com.example.finly.finance.domain.services.card.CreateCardTransactionService;
+import com.example.finly.finance.domain.services.transaction.GetAnnualRetrospectiveService;
 import com.example.finly.finance.domain.services.transaction.GetMonthlyTransactionSummaryService;
 import com.example.finly.finance.domain.services.transaction.GetTransactionsService;
 import com.example.finly.finance.infraestructure.utils.UriUtils;
@@ -28,6 +30,7 @@ public class TransactionController {
     private final CreateCardTransactionService cardTransactionService;
     private final GetMonthlyTransactionSummaryService getMonthlyTransactionSummaryService;
     private final GetTransactionsService getTransactionsService;
+    private final GetAnnualRetrospectiveService getAnnualRetrospectiveService;
 
     @PostMapping("/bank")
     public ResponseEntity<Void> createBankTransaction(@RequestBody BankTransactionInput input){
@@ -66,6 +69,13 @@ public class TransactionController {
     public ResponseEntity<MonthlyTransactionSummaryOutput> getMonthlySummary(@Valid MonthlySummaryInput input) {
         MonthlyTransactionSummaryOutput output = getMonthlyTransactionSummaryService.getSummary(input.accountId(), input.referenceMonth());
         return ResponseEntity.ok(output);
+    }
+
+    @GetMapping("/summary/annual")
+    public ResponseEntity<AnnualRetrospectiveOutput> getAnnualRetrospective(
+            @RequestParam UUID accountId,
+            @RequestParam int year) {
+        return ResponseEntity.ok(getAnnualRetrospectiveService.getRetrospective(accountId, year));
     }
 
     @GetMapping("/account/{accountId}")
