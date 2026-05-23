@@ -18,44 +18,26 @@ public interface TransactionMapper {
 
     @Mapping(target = "date", source = "transactionDate")
     @Mapping(target = "category", source = "categoryId.name")
-    @Mapping(target = "type", expression = "java(determineType(transaction))")
+    @Mapping(target = "type", source = "transactionTypeDisplayName")
     @Mapping(target = "origin", source = "originType")
-    @Mapping(target = "operation", expression = "java(determineOperation(transaction))")
+    @Mapping(target = "operation", source = "operationDisplayName")
     TransactionOutput toDto(Transaction transaction);
 
     @Mapping(target = "transactionId", source = "id")
     @Mapping(target = "date", source = "transactionDate")
     @Mapping(target = "category", source = "categoryId.name")
-    @Mapping(target = "type", expression = "java(determineType(transaction))")
+    @Mapping(target = "type", source = "transactionTypeDisplayName")
     @Mapping(target = "origin", source = "originType")
-    @Mapping(target = "operation", expression = "java(determineOperation(transaction))")
+    @Mapping(target = "operation", source = "operationDisplayName")
     MonthlyTransactionSummaryOutput.TransactionItem toSummaryItem(Transaction transaction);
 
     List<MonthlyTransactionSummaryOutput.TransactionItem> toSummaryItemList(List<Transaction> transactions);
-
-    default String determineType(Transaction transaction) {
-        if (transaction instanceof BankTransaction bt) {
-            return bt.getTransactionType().name();
-        } else if (transaction instanceof CardTransaction) {
-            return "CREDIT_CARD";
-        }
-        return "UNKNOWN";
-    }
-
-    default String determineOperation(Transaction transaction) {
-        if (transaction instanceof BankTransaction bt) {
-            return bt.getOperation().name();
-        } else if (transaction instanceof CardTransaction) {
-            return "DEBIT";
-        }
-        return "UNKNOWN";
-    }
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "accountId", ignore = true)
     @Mapping(target = "categoryId", ignore = true)
     @Mapping(target = "transactionStatus", ignore = true)
-    @Mapping(target = "transactionDate", ignore = true)
+    @Mapping(target = "value", source = "value")
     BankTransaction toEntity(BankTransactionInput input);
 
     @Mapping(target = "id", ignore = true)
@@ -64,7 +46,7 @@ public interface TransactionMapper {
     @Mapping(target = "categoryId", ignore = true)
     @Mapping(target = "invoiceId", ignore = true)
     @Mapping(target = "transactionStatus", ignore = true)
-    @Mapping(target = "transactionDate", ignore = true)
+    @Mapping(target = "value", source = "value")
     @Mapping(target = "installNumber", ignore = true)
     CardTransaction toEntity(CardTransactionInput input);
 

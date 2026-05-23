@@ -4,6 +4,7 @@ import com.example.finly.finance.domain.model.enums.ETransactionOriginType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -36,15 +37,26 @@ public class CardTransaction extends Transaction{
     @Column(name = "installment_number")
     private Integer installNumber = 1;
 
+    @Setter
     @Column(name = "total_installments")
     private Integer totalInstallments = 1;
 
     public CardTransaction(BankAccount accountId, CreditCard cardId, Category categoryId, Invoice invoiceId, BigDecimal value, Integer installNumber, Integer totalInstallments, String description){
-        super(accountId, categoryId, ETransactionOriginType.CARD, value, description);
+        super(accountId, categoryId, value, description);
         this.cardId = Objects.requireNonNull(cardId);
         this.invoiceId = Objects.requireNonNull(invoiceId);
         this.installNumber = Objects.requireNonNull(installNumber);
         this.totalInstallments = Objects.requireNonNull(totalInstallments);
+        this.setOriginType(ETransactionOriginType.CARD);
     }
 
+    @Override
+    public String getTransactionTypeDisplayName() {
+        return "CREDIT_CARD";
+    }
+
+    @Override
+    public String getOperationDisplayName() {
+        return "DEBIT";
+    }
 }

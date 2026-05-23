@@ -6,7 +6,8 @@ import com.example.finly.finance.domain.model.BankTransaction;
 import com.example.finly.finance.domain.model.enums.EBalanceOperation;
 import com.example.finly.finance.domain.model.BankAccount;
 import com.example.finly.finance.domain.model.Category;
-import com.example.finly.finance.domain.repository.BankAccountRepository;
+import com.example.finly.finance.domain.repository.BankAccountRepository; // Import necessário
+import com.example.finly.finance.domain.repository.TransactionRepository;
 import com.example.finly.finance.infraestructure.handler.exception.BankAccountNotFoundException;
 import com.example.finly.finance.infraestructure.handler.exception.CategoryNotFoundException;
 import com.example.finly.finance.infraestructure.handler.exception.TransactionDeniedException;
@@ -25,33 +26,39 @@ import java.util.UUID;
 public class CreateBankTransactionService {
 
     private final BankAccountRepository bankAccountRepository;
+    private final TransactionRepository transactionRepository; // Adicionado para persistência
     private final BudgetLimitValidator budgetLimitValidator;
     private final TransactionMapper transactionMapper;
 
     @Caching(evict = {
-        @CacheEvict(value = "dashboard_summary", allEntries = true),
-        @CacheEvict(value = "category_summary", key = "#input.accountId().toString()"),
-        @CacheEvict(value = "user_accounts", allEntries = true)
+            @CacheEvict(value = "dashboard_summary", allEntries = true),
+            @CacheEvict(value = "category_summary", key = "#input.accountId().toString()"),
+            @CacheEvict(value = "user_accounts", allEntries = true)
     })
     public UUID bankTransaction(BankTransactionInput input){
 
         var account = findBankAccount(input.accountId());
         var category = findCategory(account, input.categoryName());
 
+        // MapStruct usa os @Setters liberados para criar a entidade
         BankTransaction transaction = transactionMapper.toEntity(input);
         transaction.setAccountAndCategory(account, category);
 
         if (input.operation() == EBalanceOperation.DEBIT) {
             var referenceMonth = java.time.YearMonth.from(transaction.getTransactionDate().toLocalDate());
             var alreadySpent = budgetLimitValidator.calculateMonthlySpent(category, referenceMonth);
-            var projectedTotal = alreadySpent.add(transaction.getValue());
+            var projectedTotal = alreadySpent.add(input.value());
             budgetLimitValidator.validate(category, projectedTotal, referenceMonth);
         }
 
         transaction.markAsCompleted();
         category.addTransaction(transaction);
         applyTransaction(account, transaction);
-        
+
+        // O save() é crucial aqui para acionar a estratégia GenerationType.UUID
+        // e evitar o erro de "Identifier must be manually assigned"
+        transaction = transactionRepository.save(transaction);
+
         return transaction.getId();
     }
 
@@ -64,9 +71,7 @@ public class CreateBankTransactionService {
             account.credit(transaction.getValue());
             return;
         }
-        {
-            throw new TransactionDeniedException();
-        }
+        throw new TransactionDeniedException();
     }
 
     private BankAccount findBankAccount(UUID accountId){
@@ -76,5 +81,4 @@ public class CreateBankTransactionService {
     private Category findCategory(BankAccount account, String category){
         return account.findCategoryByName(category).orElseThrow(() -> new CategoryNotFoundException("Category does not exist"));
     }
-
 }

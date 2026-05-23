@@ -3,9 +3,7 @@ package com.example.finly.finance.domain.model;
 import com.example.finly.finance.domain.model.enums.ETransactionOriginType;
 import com.example.finly.finance.domain.model.enums.ETransactionStatus;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -21,7 +19,7 @@ import java.util.UUID;
 public abstract class Transaction {
 
     @Id
-//    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     @EqualsAndHashCode.Include
     private UUID id;
 
@@ -33,9 +31,11 @@ public abstract class Transaction {
     @JoinColumn(name = "category_id", nullable = false)
     private Category categoryId;
 
+    @Setter
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal value;
 
+    @Setter(AccessLevel.PROTECTED)
     @Enumerated(EnumType.STRING)
     @Column(name = "transaction_origin_type", nullable = false)
     private ETransactionOriginType originType;
@@ -44,24 +44,25 @@ public abstract class Transaction {
     @Column(name = "transaction_status")
     private ETransactionStatus transactionStatus = ETransactionStatus.PENDING;
 
+    @Setter
     @Column(name = "description")
     private String description;
 
+    @Setter
     @Column(name = "transaction_date", nullable = false)
     private LocalDateTime transactionDate;
 
     public Transaction(BankAccount accountId, Category categoryId,
-                       ETransactionOriginType originType,
                        BigDecimal value,
                        String description) {
-        this.id = UUID.randomUUID();
         this.accountId = Objects.requireNonNull(accountId);
         this.categoryId = Objects.requireNonNull(categoryId);
-        this.originType = Objects.requireNonNull(originType);
         this.value = Objects.requireNonNull(value);
         this.description = description;
-        this.transactionDate = LocalDateTime.now();
     }
+
+    public abstract String getTransactionTypeDisplayName();
+    public abstract String getOperationDisplayName();
 
     public void markAsCompleted(){
         this.transactionStatus = ETransactionStatus.COMPLETED;
@@ -74,5 +75,10 @@ public abstract class Transaction {
     public void setAccountAndCategory(BankAccount account, Category category) {
         this.accountId = Objects.requireNonNull(account);
         this.categoryId = Objects.requireNonNull(category);
+    }
+
+    @PrePersist
+    private void onCreate() {
+        this.transactionDate = LocalDateTime.now();
     }
 }

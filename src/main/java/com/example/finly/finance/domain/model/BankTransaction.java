@@ -6,6 +6,7 @@ import com.example.finly.finance.domain.model.enums.ETransactionOriginType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -17,17 +18,30 @@ import java.util.Objects;
 @NoArgsConstructor
 public class BankTransaction extends Transaction{
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(name = "operation", nullable = false)
     private EBalanceOperation operation;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(name = "transaction_type")
     private EBankTransactionType transactionType;
 
     public BankTransaction(BankAccount accountId, Category categoryId, BigDecimal value, String description, EBalanceOperation operation, EBankTransactionType transactionType){
-        super(accountId, categoryId, ETransactionOriginType.BANK, value, description);
+        super(accountId, categoryId, value, description);
         this.operation = Objects.requireNonNull(operation);
         this.transactionType = Objects.requireNonNull(transactionType);
+        this.setOriginType(ETransactionOriginType.BANK);
+    }
+
+    @Override
+    public String getTransactionTypeDisplayName() {
+        return this.transactionType != null ? this.transactionType.name() : "UNKNOWN";
+    }
+
+    @Override
+    public String getOperationDisplayName() {
+        return this.operation != null ? operation.name() : "UNKNOWN";
     }
 }
